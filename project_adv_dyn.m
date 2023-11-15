@@ -95,7 +95,7 @@ for i= 1:4;
     eigenfunctions=[constants_matrix(1,i)*cos(g_vector(i)*x)+constants_matrix(2,i)*sin(g_vector(i)*x)+constants_matrix(3,i)*cosh(g_vector(i)*x)+constants_matrix(4,i)*sinh(g_vector(i)*x)];
 
     subplot(4,1,i);
-    plot(x,eigenfunctions)
+    plot(x,eigenfunctions/max(abs(eigenfunctions)))
     title('Mode shape')
     xlabel('w')
     ylabel('x')
