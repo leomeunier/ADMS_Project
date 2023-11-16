@@ -1,5 +1,5 @@
 function [Phi] = phi(A,B,C,D,gamma,x)
 
-Phi = A*sin(gamma*x) + B*cos(gamma*x) + C*sinh(gamma*x) + D*cosh(gamma*x);
+Phi = A*cos(gamma*x) + B*sin(gamma*x) + C*cosh(gamma*x) + D*sinh(gamma*x);
 
 end
