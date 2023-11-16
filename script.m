@@ -7,28 +7,27 @@ h = 8e-3;
 b = 40e-3;
 rho = 2700;
 E = 68e9;
-J = (1/3)*b*h^3;
-m = rho*b*h*L;
+J = (1/12)*b*h^3;
+m = rho*b*h;
 p = pi;
 
-% Identification des frequences propres
+% Identification of natural frequencies
 
 Fmax = 200;
-fs = 0:0.05:Fmax;
+fs = 0:0.5:Fmax;
 
 omega = 2*pi*fs;
 
-gamma = (m/(E*J)^(1/4))*sqrt(omega);
+gamma = ((m*omega.^2)/(E*J)).^(1/4);
 
-det = (2 + 2*cos(gamma*L).*cosh(gamma*L)); %.*(gamma.^6);
+det = (2 + 2*cos(gamma*L).*cosh(gamma*L)).*(gamma.^6);
+% semilogy(fs, abs(det))
 
-%semilogy(fs, abs(det))
+% Identification natural modes
 
-% Identification des modes propres
-
-fsol = [4.5 28 69 155];
+fsol = [4.5 28.2 79 154.9];
 omegasol = 2*p*fsol;
-gammasol = (m/(E*J)^(1/4))*sqrt(omegasol);
+gammasol = ((m*omegasol.^2)/(E*J)).^(1/4);
 X = zeros(4,4);
 i = 0;
 
@@ -43,41 +42,47 @@ end
 
 x = 0:0.1:1.2;
 
-Phi1 = X(1,1)*sin(gammasol(1)*x) + X(1,2)*cos(gammasol(1)*x) + X(1,3)*sinh(gammasol(1)*x) + X(1,4)*cosh(gammasol(1)*x);
-Phi2 = X(2,1)*sin(gammasol(2)*x) + X(2,2)*cos(gammasol(2)*x) + X(2,3)*sinh(gammasol(2)*x) + X(2,4)*cosh(gammasol(1)*x);
-Phi3 = X(3,1)*sin(gammasol(3)*x) + X(3,2)*cos(gammasol(3)*x) + X(3,3)*sinh(gammasol(3)*x) + X(3,4)*cosh(gammasol(1)*x);
-Phi4 = X(4,1)*sin(gammasol(4)*x) + X(4,2)*cos(gammasol(4)*x) + X(4,3)*sinh(gammasol(4)*x) + X(4,4)*cosh(gammasol(1)*x);
+Phi1 = phi(X(1,1),X(1,2),X(1,3),X(1,4),gammasol(1),x);
+Phi2 = phi(X(2,1),X(2,2),X(2,3),X(2,4),gammasol(2),x);
+Phi3 = phi(X(3,1),X(3,2),X(3,3),X(3,4),gammasol(3),x);
+Phi4 = phi(X(4,1),X(4,2),X(4,3),X(4,4),gammasol(4),x);
 
-%plot(x,Phi1./max(abs(Phi1)))
-%plot(x,Phi2./max(Phi2))
-%plot(x,Phi3./max(Phi3))
-%plot(x,Phi4./max(Phi4))
+% subplot(4,1,1)
+% plot(x,Phi1./max(abs(Phi1)))
+% subplot(4,1,2)
+% plot(x,Phi2./max(abs(Phi2)))
+% subplot(4,1,3)
+% plot(x,Phi3./max(abs(Phi3)))
+% subplot(4,1,4)
+% plot(x,Phi4./max(abs(Phi4)))
 
 % Computing the FRF
 
 damp = 1/100;
-xk = x(3);
-xj = x(8);
+xk = 0.2;
+xj = 1.2;
 
 m1 = trapz(m*Phi1.^2);
 m2 = trapz(m*Phi2.^2);
 m3 = trapz(m*Phi3.^2);
 m4 = trapz(m*Phi4.^2);
 
-Phi1j = X(1,1)*sin(gammasol(1)*xj) + X(1,2)*cos(gammasol(1)*xj) + X(1,3)*sinh(gammasol(1)*xj) + X(1,4)*cosh(gammasol(1)*xj);
-Phi2j = X(2,1)*sin(gammasol(2)*xj) + X(2,2)*cos(gammasol(2)*xj) + X(2,3)*sinh(gammasol(2)*xj) + X(2,4)*cosh(gammasol(1)*xj);
-Phi3j = X(3,1)*sin(gammasol(3)*xj) + X(3,2)*cos(gammasol(3)*xj) + X(3,3)*sinh(gammasol(3)*xj) + X(3,4)*cosh(gammasol(1)*xj);
-Phi4j = X(4,1)*sin(gammasol(4)*xj) + X(4,2)*cos(gammasol(4)*xj) + X(4,3)*sinh(gammasol(4)*xj) + X(4,4)*cosh(gammasol(1)*xj);
-Phi1k = X(1,1)*sin(gammasol(1)*xk) + X(1,2)*cos(gammasol(1)*xk) + X(1,3)*sinh(gammasol(1)*xk) + X(1,4)*cosh(gammasol(1)*xk);
-Phi2k = X(2,1)*sin(gammasol(2)*xk) + X(2,2)*cos(gammasol(2)*xk) + X(2,3)*sinh(gammasol(2)*xk) + X(2,4)*cosh(gammasol(1)*xk);
-Phi3k = X(3,1)*sin(gammasol(3)*xk) + X(3,2)*cos(gammasol(3)*xk) + X(3,3)*sinh(gammasol(3)*xk) + X(3,4)*cosh(gammasol(1)*xk);
-Phi4k = X(4,1)*sin(gammasol(4)*xk) + X(4,2)*cos(gammasol(4)*xk) + X(4,3)*sinh(gammasol(4)*xk) + X(4,4)*cosh(gammasol(1)*xk);
+Phi1j = phi(X(1,1),X(1,2),X(1,3),X(1,4),gammasol(1),xj);
+Phi2j = phi(X(2,1),X(2,2),X(2,3),X(2,4),gammasol(2),xj);
+Phi3j = phi(X(3,1),X(3,2),X(3,3),X(3,4),gammasol(3),xj);
+Phi4j = phi(X(4,1),X(4,2),X(4,3),X(4,4),gammasol(4),xj);
+Phi1k = phi(X(1,1),X(1,2),X(1,3),X(1,4),gammasol(1),xk);
+Phi2k = phi(X(2,1),X(2,2),X(2,3),X(2,4),gammasol(2),xk);
+Phi3k = phi(X(3,1),X(3,2),X(3,3),X(3,4),gammasol(3),xk);
+Phi4k = phi(X(4,1),X(4,2),X(4,3),X(4,4),gammasol(4),xk);
 
-Gjk = ((Phi1j*Phi1k/m1)./(-fs.^2 + i*2*damp*gammasol(1)*fs + gammasol(1)^2)) + ((Phi2j*Phi2k/m1)./(-fs.^2 + i*2*damp*gammasol(2)*fs + gammasol(2)^2)) + ...
-    ((Phi3j*Phi3k/m1)./(-fs.^2 + i*2*damp*gammasol(3)*fs + gammasol(3)^2)) + ((Phi4j*Phi4k/m1)./(-fs.^2 + i*2*damp*gammasol(4)*fs + gammasol(4)^2));
+Gjk = ((Phi1j*Phi1k/m1)./(-omega.^2 + i*2*damp*omegasol(1)*omega + omegasol(1)^2)) + ((Phi2j*Phi2k/m2)./(-omega.^2 + i*2*damp*omegasol(2)*omega + omegasol(2)^2)) + ...
+    ((Phi3j*Phi3k/m3)./(-omega.^2 + i*2*damp*omegasol(3)*fs + omegasol(3)^2)) + ((Phi4j*Phi4k/m4)./(-omega.^2 + i*2*damp*omegasol(4)*fs + omegasol(4)^2));
 
-%plot(fs,abs(Gjk))
-%plot(fs,angle(Gjk))
+subplot(2,1,1)
+semilogy(fs,abs(Gjk))
+subplot(2,1,2)
+plot(fs,angle(Gjk))
 
 
 
