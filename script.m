@@ -63,13 +63,13 @@ plot(x,Phi4./max(abs(Phi4)))
 % Computing the FRF
 
 damp = 1/100;
-xk = 0.2;
-xj = 1.2;
-
 m1 = trapz(m*Phi1.^2);
 m2 = trapz(m*Phi2.^2);
 m3 = trapz(m*Phi3.^2);
 m4 = trapz(m*Phi4.^2);
+
+xk = 0.2;
+xj = 1.2;
 
 Phi1j = phi(X(1,1),X(1,2),X(1,3),X(1,4),gammasol(1),xj);
 Phi2j = phi(X(2,1),X(2,2),X(2,3),X(2,4),gammasol(2),xj);
@@ -80,17 +80,72 @@ Phi2k = phi(X(2,1),X(2,2),X(2,3),X(2,4),gammasol(2),xk);
 Phi3k = phi(X(3,1),X(3,2),X(3,3),X(3,4),gammasol(3),xk);
 Phi4k = phi(X(4,1),X(4,2),X(4,3),X(4,4),gammasol(4),xk);
 
-Gjk = ((Phi1j*Phi1k/m1)./(-omega.^2 + i*2*damp*omegasol(1)*omega + omegasol(1)^2)) + ((Phi2j*Phi2k/m2)./(-omega.^2 + i*2*damp*omegasol(2)*omega + omegasol(2)^2)) + ...
+Gjk1 = ((Phi1j*Phi1k/m1)./(-omega.^2 + i*2*damp*omegasol(1)*omega + omegasol(1)^2)) + ((Phi2j*Phi2k/m2)./(-omega.^2 + i*2*damp*omegasol(2)*omega + omegasol(2)^2)) + ...
     ((Phi3j*Phi3k/m3)./(-omega.^2 + i*2*damp*omegasol(3)*fs + omegasol(3)^2)) + ((Phi4j*Phi4k/m4)./(-omega.^2 + i*2*damp*omegasol(4)*fs + omegasol(4)^2));
 
 figure(3)
 subplot(2,1,1)
-semilogy(fs,abs(Gjk))
+semilogy(fs,abs(Gjk1))
 subplot(2,1,2)
-plot(fs,angle(Gjk))
+plot(fs,angle(Gjk1))
+
+xk = 0.5;
+xj = 1;
+
+Phi1j = phi(X(1,1),X(1,2),X(1,3),X(1,4),gammasol(1),xj);
+Phi2j = phi(X(2,1),X(2,2),X(2,3),X(2,4),gammasol(2),xj);
+Phi3j = phi(X(3,1),X(3,2),X(3,3),X(3,4),gammasol(3),xj);
+Phi4j = phi(X(4,1),X(4,2),X(4,3),X(4,4),gammasol(4),xj);
+Phi1k = phi(X(1,1),X(1,2),X(1,3),X(1,4),gammasol(1),xk);
+Phi2k = phi(X(2,1),X(2,2),X(2,3),X(2,4),gammasol(2),xk);
+Phi3k = phi(X(3,1),X(3,2),X(3,3),X(3,4),gammasol(3),xk);
+Phi4k = phi(X(4,1),X(4,2),X(4,3),X(4,4),gammasol(4),xk);
+
+Gjk2 = ((Phi1j*Phi1k/m1)./(-omega.^2 + i*2*damp*omegasol(1)*omega + omegasol(1)^2)) + ((Phi2j*Phi2k/m2)./(-omega.^2 + i*2*damp*omegasol(2)*omega + omegasol(2)^2)) + ...
+    ((Phi3j*Phi3k/m3)./(-omega.^2 + i*2*damp*omegasol(3)*fs + omegasol(3)^2)) + ((Phi4j*Phi4k/m4)./(-omega.^2 + i*2*damp*omegasol(4)*fs + omegasol(4)^2));
 
 
+xk = 0.1;
+xj = 0.8;
 
+Phi1j = phi(X(1,1),X(1,2),X(1,3),X(1,4),gammasol(1),xj);
+Phi2j = phi(X(2,1),X(2,2),X(2,3),X(2,4),gammasol(2),xj);
+Phi3j = phi(X(3,1),X(3,2),X(3,3),X(3,4),gammasol(3),xj);
+Phi4j = phi(X(4,1),X(4,2),X(4,3),X(4,4),gammasol(4),xj);
+Phi1k = phi(X(1,1),X(1,2),X(1,3),X(1,4),gammasol(1),xk);
+Phi2k = phi(X(2,1),X(2,2),X(2,3),X(2,4),gammasol(2),xk);
+Phi3k = phi(X(3,1),X(3,2),X(3,3),X(3,4),gammasol(3),xk);
+Phi4k = phi(X(4,1),X(4,2),X(4,3),X(4,4),gammasol(4),xk);
+
+Gjk3 = ((Phi1j*Phi1k/m1)./(-omega.^2 + i*2*damp*omegasol(1)*omega + omegasol(1)^2)) + ((Phi2j*Phi2k/m2)./(-omega.^2 + i*2*damp*omegasol(2)*omega + omegasol(2)^2)) + ...
+    ((Phi3j*Phi3k/m3)./(-omega.^2 + i*2*damp*omegasol(3)*fs + omegasol(3)^2)) + ((Phi4j*Phi4k/m4)./(-omega.^2 + i*2*damp*omegasol(4)*fs + omegasol(4)^2));
+
+
+xk = 1;
+xj = 0.4;
+
+Phi1j = phi(X(1,1),X(1,2),X(1,3),X(1,4),gammasol(1),xj);
+Phi2j = phi(X(2,1),X(2,2),X(2,3),X(2,4),gammasol(2),xj);
+Phi3j = phi(X(3,1),X(3,2),X(3,3),X(3,4),gammasol(3),xj);
+Phi4j = phi(X(4,1),X(4,2),X(4,3),X(4,4),gammasol(4),xj);
+Phi1k = phi(X(1,1),X(1,2),X(1,3),X(1,4),gammasol(1),xk);
+Phi2k = phi(X(2,1),X(2,2),X(2,3),X(2,4),gammasol(2),xk);
+Phi3k = phi(X(3,1),X(3,2),X(3,3),X(3,4),gammasol(3),xk);
+Phi4k = phi(X(4,1),X(4,2),X(4,3),X(4,4),gammasol(4),xk);
+
+Gjk4 = ((Phi1j*Phi1k/m1)./(-omega.^2 + i*2*damp*omegasol(1)*omega + omegasol(1)^2)) + ((Phi2j*Phi2k/m2)./(-omega.^2 + i*2*damp*omegasol(2)*omega + omegasol(2)^2)) + ...
+    ((Phi3j*Phi3k/m3)./(-omega.^2 + i*2*damp*omegasol(3)*fs + omegasol(3)^2)) + ((Phi4j*Phi4k/m4)./(-omega.^2 + i*2*damp*omegasol(4)*fs + omegasol(4)^2));
+
+
+figure(4)
+semilogy(fs,abs(Gjk1))
+hold on
+semilogy(fs,abs(Gjk2))
+hold on
+semilogy(fs,abs(Gjk3))
+hold on
+semilogy(fs,abs(Gjk4))
+hold on
 
 
 
