@@ -105,6 +105,7 @@ end
 
 %% Frequency response functions 
 
+%Computation of mi
 csi= 0.01;
 mass= zeros(1,4);
 
@@ -114,28 +115,142 @@ for i= 1:4
     mass(i)= trapz(x,Y);
 end
 
-xk= L;
-xj= 0.5*L;
+xk=[1.2;0.5;0.1;1];
+xj=[0.2;1;0.8;0.4];
 
-eigenfunctions_ktot= zeros(1,4);
-eigenfunctions_jtot= zeros(1,4);
+%FRF n°1
+
+eigenfunctions_ktot1= zeros(1,4);
+eigenfunctions_jtot1= zeros(1,4);
 
 for l= 1:4 
-    eigenfunctions_k=[constants_matrix(1,l)*cos(g_vector(l)*xk)+constants_matrix(2,l)*sin(g_vector(l)*xk)+constants_matrix(3,l)*cosh(g_vector(l)*xk)+constants_matrix(4,l)*sinh(g_vector(l)*xk)];
-    eigenfunctions_j=[constants_matrix(1,l)*cos(g_vector(l)*xj)+constants_matrix(2,l)*sin(g_vector(l)*xj)+constants_matrix(3,l)*cosh(g_vector(l)*xj)+constants_matrix(4,l)*sinh(g_vector(l)*xj)];
+   
+    eigenfunctions_k=-[constants_matrix(1,l)*cos(g_vector(l)*xk(1))+constants_matrix(2,l)*sin(g_vector(l)*xk(1))+constants_matrix(3,l)*cosh(g_vector(l)*xk(1))+constants_matrix(4,l)*sinh(g_vector(l)*xk(1))];
+    eigenfunctions_j=[constants_matrix(1,l)*cos(g_vector(l)*xj(1))+constants_matrix(2,l)*sin(g_vector(l)*xj(1))+constants_matrix(3,l)*cosh(g_vector(l)*xj(1))+constants_matrix(4,l)*sinh(g_vector(l)*xj(1))];
     
-    eigenfunctions_ktot(l)= eigenfunctions_k;
-    eigenfunctions_jtot(l)= eigenfunctions_j;
+    eigenfunctions_ktot1(l)= eigenfunctions_k;
+    eigenfunctions_jtot1(l)= eigenfunctions_j;
 end
 
 
-OMEGA= 0:0.1:1000;
 
-Gjk_1= [((eigenfunctions_ktot(1).*eigenfunctions_jtot(1))./mass(1))./(-OMEGA.^2+(2.*csi.*wn_vector(1).*OMEGA).*sqrt(-1)+ wn_vector(1))]+[((eigenfunctions_ktot(2).*eigenfunctions_jtot(2))./mass(2))./(-OMEGA.^2+(2.*csi.*wn_vector(2).*OMEGA).*sqrt(-1)+ wn_vector(2))]+[((eigenfunctions_ktot(3).*eigenfunctions_jtot(3))./mass(3))./(-OMEGA.^2+(2.*csi.*wn_vector(3).*OMEGA).*sqrt(-1)+ wn_vector(3))]+[((eigenfunctions_ktot(4).*eigenfunctions_jtot(4))./mass(4))./(-OMEGA.^2+(2.*csi.*wn_vector(4).*OMEGA).*sqrt(-1)+ wn_vector(4))];
+Gjk_1= [((eigenfunctions_ktot1(1).*eigenfunctions_jtot1(1))./mass(1))./(-w.^2+(2.*csi.*wn_vector(1).*w).*sqrt(-1)+ wn_vector(1).^2)]+[((eigenfunctions_ktot1(2).*eigenfunctions_jtot1(2))./mass(2))./(-w.^2+(2.*csi.*wn_vector(2).*w).*sqrt(-1)+ wn_vector(2).^2)]+[((eigenfunctions_ktot1(3).*eigenfunctions_jtot1(3))./mass(3))./(-w.^2+(2.*csi.*wn_vector(3).*w).*sqrt(-1)+ wn_vector(3).^2)]+[((eigenfunctions_ktot1(4).*eigenfunctions_jtot1(4))./mass(4))./(-w.^2+(2.*csi.*wn_vector(4).*w).*sqrt(-1)+ wn_vector(4).^2)];
 
 
 figure;
-plot(OMEGA,Gjk_1);
+title('Amplitudes and phases of the FRFs')
+subplot(4,2,1)
+semilogy(fs,abs(Gjk_1));
+title('FRF 1 amplitude')
+
+subplot(4,2,2)
+plot(fs,angle(Gjk_1));
+title('FRF 1 phase')
+
+%FRF n°2
+
+eigenfunctions_ktot2= zeros(1,4);
+eigenfunctions_jtot2= zeros(1,4);
+
+for l= 1:4 
+   
+    eigenfunctions_k=-[constants_matrix(1,l)*cos(g_vector(l)*xk(2))+constants_matrix(2,l)*sin(g_vector(l)*xk(2))+constants_matrix(3,l)*cosh(g_vector(l)*xk(2))+constants_matrix(4,l)*sinh(g_vector(l)*xk(2))];
+    eigenfunctions_j=[constants_matrix(1,l)*cos(g_vector(l)*xj(2))+constants_matrix(2,l)*sin(g_vector(l)*xj(2))+constants_matrix(3,l)*cosh(g_vector(l)*xj(2))+constants_matrix(4,l)*sinh(g_vector(l)*xj(2))];
+    
+    eigenfunctions_ktot2(l)= eigenfunctions_k;
+    eigenfunctions_jtot2(l)= eigenfunctions_j;
+end
+
+
+
+Gjk_2= [((eigenfunctions_ktot2(1).*eigenfunctions_jtot2(1))./mass(1))./(-w.^2+(2.*csi.*wn_vector(1).*w).*sqrt(-1)+ wn_vector(1).^2)]+[((eigenfunctions_ktot2(2).*eigenfunctions_jtot2(2))./mass(2))./(-w.^2+(2.*csi.*wn_vector(2).*w).*sqrt(-1)+ wn_vector(2).^2)]+[((eigenfunctions_ktot2(3).*eigenfunctions_jtot2(3))./mass(3))./(-w.^2+(2.*csi.*wn_vector(3).*w).*sqrt(-1)+ wn_vector(3).^2)]+[((eigenfunctions_ktot2(4).*eigenfunctions_jtot2(4))./mass(4))./(-w.^2+(2.*csi.*wn_vector(4).*w).*sqrt(-1)+ wn_vector(4).^2)];
+
+
+subplot(4,2,3)
+semilogy(fs,abs(Gjk_2));
+title('FRF 2 amplitude')
+subplot(4,2,4)
+plot(fs,angle(Gjk_2));
+title('FRF 2 phase')
+
+%FRF n°3
+
+eigenfunctions_ktot3= zeros(1,4);
+eigenfunctions_jtot3= zeros(1,4);
+
+for l= 1:4 
+   
+    eigenfunctions_k=-[constants_matrix(1,l)*cos(g_vector(l)*xk(3))+constants_matrix(2,l)*sin(g_vector(l)*xk(3))+constants_matrix(3,l)*cosh(g_vector(l)*xk(3))+constants_matrix(4,l)*sinh(g_vector(l)*xk(3))];
+    eigenfunctions_j=[constants_matrix(1,l)*cos(g_vector(l)*xj(3))+constants_matrix(2,l)*sin(g_vector(l)*xj(3))+constants_matrix(3,l)*cosh(g_vector(l)*xj(3))+constants_matrix(4,l)*sinh(g_vector(l)*xj(3))];
+    
+    eigenfunctions_ktot3(l)= eigenfunctions_k;
+    eigenfunctions_jtot3(l)= eigenfunctions_j;
+end
+
+
+
+Gjk_3= [((eigenfunctions_ktot3(1).*eigenfunctions_jtot3(1))./mass(1))./(-w.^2+(2.*csi.*wn_vector(1).*w).*sqrt(-1)+ wn_vector(1).^2)]+[((eigenfunctions_ktot3(2).*eigenfunctions_jtot3(2))./mass(2))./(-w.^2+(2.*csi.*wn_vector(2).*w).*sqrt(-1)+ wn_vector(2).^2)]+[((eigenfunctions_ktot3(3).*eigenfunctions_jtot3(3))./mass(3))./(-w.^2+(2.*csi.*wn_vector(3).*w).*sqrt(-1)+ wn_vector(3).^2)]+[((eigenfunctions_ktot3(4).*eigenfunctions_jtot3(4))./mass(4))./(-w.^2+(2.*csi.*wn_vector(4).*w).*sqrt(-1)+ wn_vector(4).^2)];
+
+
+subplot(4,2,5)
+semilogy(fs,abs(Gjk_3));
+title('FRF 3 amplitude')
+subplot(4,2,6)
+plot(fs,angle(Gjk_3));
+title('FRF 3 phase')
+
+
+%FRF n°4
+
+eigenfunctions_ktot4= zeros(1,4);
+eigenfunctions_jtot4= zeros(1,4);
+
+for l= 1:4 
+   
+    eigenfunctions_k=-[constants_matrix(1,l)*cos(g_vector(l)*xk(4))+constants_matrix(2,l)*sin(g_vector(l)*xk(4))+constants_matrix(3,l)*cosh(g_vector(l)*xk(4))+constants_matrix(4,l)*sinh(g_vector(l)*xk(4))];
+    eigenfunctions_j=[constants_matrix(1,l)*cos(g_vector(l)*xj(4))+constants_matrix(2,l)*sin(g_vector(l)*xj(4))+constants_matrix(3,l)*cosh(g_vector(l)*xj(4))+constants_matrix(4,l)*sinh(g_vector(l)*xj(4))];
+    
+    eigenfunctions_ktot4(l)= eigenfunctions_k;
+    eigenfunctions_jtot4(l)= eigenfunctions_j;
+end
+
+
+
+Gjk_4= [((eigenfunctions_ktot4(1).*eigenfunctions_jtot4(1))./mass(1))./(-w.^2+(2.*csi.*wn_vector(1).*w).*sqrt(-1)+ wn_vector(1).^2)]+[((eigenfunctions_ktot4(2).*eigenfunctions_jtot4(2))./mass(2))./(-w.^2+(2.*csi.*wn_vector(2).*w).*sqrt(-1)+ wn_vector(2).^2)]+[((eigenfunctions_ktot4(3).*eigenfunctions_jtot4(3))./mass(3))./(-w.^2+(2.*csi.*wn_vector(3).*w).*sqrt(-1)+ wn_vector(3).^2)]+[((eigenfunctions_ktot4(4).*eigenfunctions_jtot4(4))./mass(4))./(-w.^2+(2.*csi.*wn_vector(4).*w).*sqrt(-1)+ wn_vector(4).^2)];
+
+
+subplot(4,2,7)
+semilogy(fs,abs(Gjk_4));
+title('FRF 4 amplitude')
+subplot(4,2,8)
+plot(fs,angle(Gjk_4));
+title('FRF 4 phase')
+
+%Comparison between FRFs
+
+figure
+semilogy(fs,abs(Gjk_1));
+hold on
+semilogy(fs,abs(Gjk_2));
+hold on
+semilogy(fs,abs(Gjk_3));
+hold on
+semilogy(fs,abs(Gjk_4));
+
+title('comparison between FRFs amplitudes')
+legend('FRF1','FRF2','FRF3','FRF4')
+
+% figure
+% plot(fs,angle(Gjk_1));
+% hold on
+% plot(fs,angle(Gjk_2));
+% hold on
+% plot(fs,angle(Gjk_3));
+% hold on
+% plot(fs,angle(Gjk_4));
+% 
+% title('comparison between FRFs phases')
+% legend('FRF1','FRF2','FRF3','FRF4')
 
 
   
