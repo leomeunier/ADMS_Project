@@ -22,7 +22,7 @@ m= rho*b*h;     %[kg]
 
 
 % Boundary conditions 
-fs=0:0.1:200;
+fs=0.01:0.01:200;
 w=2*pi*fs;
 g= ((m*w.^2)/(E*J)).^(1/4);
 
@@ -240,17 +240,50 @@ semilogy(fs,abs(Gjk_4));
 title('comparison between FRFs amplitudes')
 legend('FRF1','FRF2','FRF3','FRF4')
 
-% figure
-% plot(fs,angle(Gjk_1));
-% hold on
-% plot(fs,angle(Gjk_2));
-% hold on
-% plot(fs,angle(Gjk_3));
-% hold on
-% plot(fs,angle(Gjk_4));
-% 
-% title('comparison between FRFs phases')
-% legend('FRF1','FRF2','FRF3','FRF4')
+figure
+plot(fs,angle(Gjk_1));
+hold on
+plot(fs,angle(Gjk_2));
+hold on
+plot(fs,angle(Gjk_3));
+hold on
+plot(fs,angle(Gjk_4));
+
+title('comparison between FRFs phases')
+legend('FRF1','FRF2','FRF3','FRF4')
+
+%% Modal parameters identification
+fs=0.01:0.01:14;
+omegafs = 2*pi*fs;
+
+GrEXP = [ Gjk_1(1:size(fs,2)) ; Gjk_2(1:size(fs,2)) ; Gjk_3(1:size(fs,2)) ; Gjk_4(1:size(fs,2)) ];
+
+% Least square minimization (have a look on epsilon function)
+
+% Initial guesses
+x0 = [-10e-3,1/100,4.5,0,0,0,0];
+% Lsqm function
+x = lsqnonlin(@(x) epsilon(x, fs, GrEXP), x0);
+% Having a first look at x
+disp(x);
+
+% Computing of GrNUMs to compare them to Gjk
+
+%  each GrNUMi is supposed to match with the peak number i 
+
+GrNUM1 = (x(1)./(-omegafs.^2 + 1i*2*x(2)*x(3)*omegafs + x(3)^2)) + (x(4)+1i*x(5))./(omegafs.^2) + x(6)+1i*x(7);
+
+figure
+subplot(2,1,1)
+semilogy(fs,abs(Gjk_1(1:size(fs,2))))
+hold on 
+semilogy(fs,abs(GrNUM1),'o')
+subplot(2,1,2)
+plot(fs,angle(Gjk_1(1:size(fs,2))))
+hold on 
+plot(fs,angle(GrNUM1),'o')
+
+
 
 
   
