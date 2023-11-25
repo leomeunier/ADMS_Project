@@ -258,12 +258,19 @@ omegafs = 2*pi*fs;
 
 GrEXP = [ Gjk_1(1:size(fs,2)) ; Gjk_2(1:size(fs,2)) ; Gjk_3(1:size(fs,2)) ; Gjk_4(1:size(fs,2)) ];
 
+
+entrata_Gjk= 4.5/0.01;
+estim11= imag(Gjk_1(entrata_Gjk)).*2.*wn_1.^2.*csi;
+estim12= imag(Gjk_2(entrata_Gjk)).*2.*wn_1.^2.*csi;
+estim13= imag(Gjk_3(entrata_Gjk)).*2.*wn_1.^2.*csi;
+estim14= imag(Gjk_4(entrata_Gjk)).*2.*wn_1.^2.*csi;
+
 % Least square minimization (have a look on epsilon function)
 
 % Initial guesses
-x0 = [-10e-3,1/100,4.5,0,0,0,0];
+x0 = [estim11,estim12,estim13,estim14,1/100,wn_1,0,0,0,0];
 % Lsqm function
-x = lsqnonlin(@(x) epsilon(x, fs, GrEXP), x0);
+x = lsqnonlin(@(x) epsilon1(x, fs, GrEXP), x0);
 % Having a first look at x
 disp(x);
 
@@ -271,7 +278,7 @@ disp(x);
 
 %  each GrNUMi is supposed to match with the peak number i 
 
-GrNUM1 = (x(1)./(-omegafs.^2 + 1i*2*x(2)*x(3)*omegafs + x(3)^2)) + (x(4)+1i*x(5))./(omegafs.^2) + x(6)+1i*x(7);
+GrNUM1 = (x(1)./(-omegafs.^2 + 1i*2*x(5)*x(6)*omegafs + x(6)^2)) + (x(7)+1i*x(8))./(omegafs.^2) + x(9)+1i*x(10);
 
 figure
 subplot(2,1,1)
@@ -281,22 +288,122 @@ semilogy(fs,abs(GrNUM1),'o')
 subplot(2,1,2)
 plot(fs,angle(Gjk_1(1:size(fs,2))))
 hold on 
-plot(fs,angle(GrNUM1),'o')
+plot(fs,angle(-GrNUM1),'o')
+
+%%
+fs=14:0.01:50;
+omegafs = 2*pi*fs;
+
+GrEXP = [ Gjk_1(1401:1400+size(fs,2)) ; Gjk_2(1401:1400+size(fs,2)) ; Gjk_3(1401:1400+size(fs,2)) ; Gjk_4(1401:1400+size(fs,2)) ];
+
+% Least square minimization (have a look on epsilon function)
+
+entrata_Gjk= 28.2/0.01;
+estim21= imag(Gjk_1(entrata_Gjk)).*2.*wn_2.^2.*csi;
+estim22= imag(Gjk_2(entrata_Gjk)).*2.*wn_2.^2.*csi;
+estim23= imag(Gjk_3(entrata_Gjk)).*2.*wn_2.^2.*csi;
+estim24= imag(Gjk_4(entrata_Gjk)).*2.*wn_2.^2.*csi;
+
+% Initial guesses
+x0 = [estim21,estim22,estim23,estim24,1/100,wn_2,0,0,0,0];
+% Lsqm function
+x = lsqnonlin(@(x) epsilon1(x, fs, GrEXP), x0);
+% Having a first look at x
+disp(x);
+
+% Computing of GrNUMs to compare them to Gjk
+
+%  each GrNUMi is supposed to match with the peak number i 
+
+GrNUM1 = (x(1)./(-omegafs.^2 + 1i*2*x(5)*x(6)*omegafs + x(6)^2)) + (x(7)+1i*x(8))./(omegafs.^2) + x(9)+1i*x(10);
+
+figure
+subplot(2,1,1)
+semilogy(fs,abs(Gjk_1(1401:1400+size(fs,2))))
+hold on 
+semilogy(fs,abs(GrNUM1),'o')
+subplot(2,1,2)
+plot(fs,angle(Gjk_1(1401:1400+size(fs,2))))
+hold on 
+plot(fs,angle(-GrNUM1),'o')
 
 
+%%
+fs=50:0.01:115;
+omegafs = 2*pi*fs;
+
+GrEXP = [ Gjk_1(5001:5000+size(fs,2)) ; Gjk_2(5001:5000+size(fs,2)) ; Gjk_3(5001:5000+size(fs,2)) ; Gjk_4(5001:5000+size(fs,2)) ];
+
+% Least square minimization (have a look on epsilon function)
+
+entrata_Gjk= 79/0.01;
+estim31= imag(Gjk_1(entrata_Gjk)).*2.*wn_3.^2.*csi;
+estim32= imag(Gjk_2(entrata_Gjk)).*2.*wn_3.^2.*csi;
+estim33= imag(Gjk_3(entrata_Gjk)).*2.*wn_3.^2.*csi;
+estim34= imag(Gjk_4(entrata_Gjk)).*2.*wn_3.^2.*csi;
+
+% Initial guesses
+x0 = [estim31,estim32,estim33,estim34,1/100,wn_3,0,0,0,0];
+% Lsqm function
+x = lsqnonlin(@(x) epsilon1(x, fs, GrEXP), x0);
+% Having a first look at x
+disp(x);
+
+% Computing of GrNUMs to compare them to Gjk
+
+%  each GrNUMi is supposed to match with the peak number i 
+
+GrNUM1 = (x(1)./(-omegafs.^2 + 1i*2*x(5)*x(6)*omegafs + x(6)^2)) + (x(7)+1i*x(8))./(omegafs.^2) + x(9)+1i*x(10);
+figure
+subplot(2,1,1)
+semilogy(fs,abs(Gjk_1(5001:5000+size(fs,2))))
+hold on 
+semilogy(fs,abs(GrNUM1),'o')
+subplot(2,1,2)
+plot(fs,angle(Gjk_1(5001:5000+size(fs,2))))
+hold on 
+plot(fs,angle(-GrNUM1),'o')
 
 
-  
+%%
+fs=115:0.01:200;
+omegafs = 2*pi*fs;
 
+GrEXP = [ Gjk_1(11500:11499+size(fs,2)) ; Gjk_2(11500:11499+size(fs,2)) ; Gjk_3(11500:11499+size(fs,2)) ; Gjk_4(11500:11499+size(fs,2)) ];
 
+% Least square minimization (have a look on epsilon function)
 
+entrata_Gjk= 154.9/0.01;
+estim41= imag(Gjk_1(entrata_Gjk)).*2.*wn_4.^2.*csi;
+estim42= imag(Gjk_2(entrata_Gjk)).*2.*wn_4.^2.*csi;
+estim43= imag(Gjk_3(entrata_Gjk)).*2.*wn_4.^2.*csi;
+estim44= imag(Gjk_4(entrata_Gjk)).*2.*wn_4.^2.*csi;
 
+% Initial guesses
+x0 = [estim41,estim42,estim43,estim44,1/100,wn_4,0,0,0,0];
+% Lsqm function
+x = lsqnonlin(@(x) epsilon1(x, fs, GrEXP), x0);
+% Having a first look at x
+disp(x);
 
+% Computing of GrNUMs to compare them to Gjk
 
+%  each GrNUMi is supposed to match with the peak number i 
 
+GrNUM1 = (x(1)./(-omegafs.^2 + 1i*2*x(5)*x(6)*omegafs + x(6)^2)) + (x(7)+1i*x(8))./(omegafs.^2) + x(9)+1i*x(10);
 
+figure
+subplot(2,1,1)
+semilogy(fs,abs(Gjk_1(11500:11499+size(fs,2))))
+hold on 
+semilogy(fs,abs(GrNUM1),'o')
+subplot(2,1,2)
+plot(fs,angle(Gjk_1(11500:11499+size(fs,2))))
+hold on 
+plot(fs,angle(-GrNUM1),'o')
 
-
-   
-
-
+%%
+% % Mode shape identification
+% X1num=[0.1778/xk(1),0.7369/xk(2),0.027/xk(3),0.4946/xk(4)];
+% figure
+% plot(xj,X1num,'o')
