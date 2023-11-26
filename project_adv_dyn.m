@@ -90,6 +90,7 @@ disp(['X4 =' mat2str(X4)]);
 
 x=0:0.01:L;
 
+eigenfunctions= zeros(1,4);
 figure;
 for i= 1:4;
     eigenfunctions=[constants_matrix(1,i)*cos(g_vector(i)*x)+constants_matrix(2,i)*sin(g_vector(i)*x)+constants_matrix(3,i)*cosh(g_vector(i)*x)+constants_matrix(4,i)*sinh(g_vector(i)*x)];
@@ -240,17 +241,17 @@ semilogy(fs,abs(Gjk_4));
 title('comparison between FRFs amplitudes')
 legend('FRF1','FRF2','FRF3','FRF4')
 
-figure
-plot(fs,angle(Gjk_1));
-hold on
-plot(fs,angle(Gjk_2));
-hold on
-plot(fs,angle(Gjk_3));
-hold on
-plot(fs,angle(Gjk_4));
-
-title('comparison between FRFs phases')
-legend('FRF1','FRF2','FRF3','FRF4')
+% figure
+% plot(fs,angle(Gjk_1));
+% hold on
+% plot(fs,angle(Gjk_2));
+% hold on
+% plot(fs,angle(Gjk_3));
+% hold on
+% plot(fs,angle(Gjk_4));
+% 
+% title('comparison between FRFs phases')
+% legend('FRF1','FRF2','FRF3','FRF4')
 
 %% Modal parameters identification
 fs=0.01:0.01:14;
@@ -264,6 +265,9 @@ estim11= imag(Gjk_1(entrata_Gjk)).*2.*wn_1.^2.*csi;
 estim12= imag(Gjk_2(entrata_Gjk)).*2.*wn_1.^2.*csi;
 estim13= imag(Gjk_3(entrata_Gjk)).*2.*wn_1.^2.*csi;
 estim14= imag(Gjk_4(entrata_Gjk)).*2.*wn_1.^2.*csi;
+
+%estimation of damping
+
 
 % Least square minimization (have a look on epsilon function)
 
@@ -280,6 +284,7 @@ disp(x);
 
 GrNUM1 = (x(1)./(-omegafs.^2 + 1i*2*x(5)*x(6)*omegafs + x(6)^2)) + (x(7)+1i*x(8))./(omegafs.^2) + x(9)+1i*x(10);
 
+x1=x;
 figure
 subplot(2,1,1)
 semilogy(fs,abs(Gjk_1(1:size(fs,2))))
@@ -309,7 +314,7 @@ x0 = [estim21,estim22,estim23,estim24,1/100,wn_2,0,0,0,0];
 % Lsqm function
 x = lsqnonlin(@(x) epsilon1(x, fs, GrEXP), x0);
 % Having a first look at x
-disp(x);
+disp(xj);
 
 % Computing of GrNUMs to compare them to Gjk
 
@@ -317,6 +322,7 @@ disp(x);
 
 GrNUM1 = (x(1)./(-omegafs.^2 + 1i*2*x(5)*x(6)*omegafs + x(6)^2)) + (x(7)+1i*x(8))./(omegafs.^2) + x(9)+1i*x(10);
 
+x2=x
 figure
 subplot(2,1,1)
 semilogy(fs,abs(Gjk_1(1401:1400+size(fs,2))))
@@ -354,6 +360,8 @@ disp(x);
 %  each GrNUMi is supposed to match with the peak number i 
 
 GrNUM1 = (x(1)./(-omegafs.^2 + 1i*2*x(5)*x(6)*omegafs + x(6)^2)) + (x(7)+1i*x(8))./(omegafs.^2) + x(9)+1i*x(10);
+
+x3=x;
 figure
 subplot(2,1,1)
 semilogy(fs,abs(Gjk_1(5001:5000+size(fs,2))))
@@ -392,6 +400,7 @@ disp(x);
 
 GrNUM1 = (x(1)./(-omegafs.^2 + 1i*2*x(5)*x(6)*omegafs + x(6)^2)) + (x(7)+1i*x(8))./(omegafs.^2) + x(9)+1i*x(10);
 
+x4=x;
 figure
 subplot(2,1,1)
 semilogy(fs,abs(Gjk_1(11500:11499+size(fs,2))))
@@ -403,7 +412,23 @@ hold on
 plot(fs,angle(-GrNUM1),'o')
 
 %%
-% % Mode shape identification
-% X1num=[0.1778/xk(1),0.7369/xk(2),0.027/xk(3),0.4946/xk(4)];
-% figure
-% plot(xj,X1num,'o')
+% Mode shape identification
+X1num=[0.1778,0.7369,0.027,0.4946];
+figure
+
+x=0:0.01:L;
+eigenfunctions=[constants_matrix(1,1)*cos(g_vector(1)*x)+constants_matrix(2,1)*sin(g_vector(1)*x)+constants_matrix(3,1)*cosh(g_vector(1)*x)+constants_matrix(4,1)*sinh(g_vector(1)*x)];
+plot(xj,X1num,'o')
+hold on
+plot(x,eigenfunctions)
+hold on
+
+
+figure 
+plot(xj,x2(1:4),'o')
+
+figure 
+plot(xj,x3(1:4),'o')
+
+figure 
+plot(xj,x4(1:4),'o')
