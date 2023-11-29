@@ -66,10 +66,10 @@ plot(x,Phi4./max(abs(Phi4)))
 % 1. Getting the modal masses
 
 damp = 1/100;
-m1 = trapz(m*Phi1.^2);
-m2 = trapz(m*Phi2.^2);
-m3 = trapz(m*Phi3.^2);
-m4 = trapz(m*Phi4.^2);
+m1 = trapz(m*Phi1.^2)*damp;
+m2 = trapz(m*Phi2.^2)*damp;
+m3 = trapz(m*Phi3.^2)*damp;
+m4 = trapz(m*Phi4.^2)*damp;
 
 xk = 1.2;
 xj = 0.2;
@@ -99,7 +99,7 @@ plot(fs,angle(-Gjk1))
 
 
 % Trying to estimate A1 for the least square minimization
-estim1 = (Phi1j*Phi1k/m1) + (Phi2j*Phi2k/m2) + (Phi3j*Phi3k/m3) + (Phi4j*Phi4k/m4);
+estim1 = imag(Gjk1(4.5/0.01))*2*omegasol(1)^2*damp;
 
 % Computing FRFs to get all experimental values
 xk = 0.5;
@@ -130,8 +130,8 @@ Phi2k = phi(X(2,1),X(2,2),X(2,3),X(2,4),gammasol(2),xk);
 Phi3k = phi(X(3,1),X(3,2),X(3,3),X(3,4),gammasol(3),xk);
 Phi4k = phi(X(4,1),X(4,2),X(4,3),X(4,4),gammasol(4),xk);
 
-Gjk3 = ((Phi1j*Phi1k/m1)./(-omega.^2 + i*2*damp*omegasol(1)*omega + omegasol(1)^2)) + ((Phi2j*Phi2k/m2)./(-omega.^2 + i*2*damp*omegasol(2)*omega + omegasol(2)^2)) + ...
-    ((Phi3j*Phi3k/m3)./(-omega.^2 + i*2*damp*omegasol(3)*omega + omegasol(3)^2)) + ((Phi4j*Phi4k/m4)./(-omega.^2 + i*2*damp*omegasol(4)*omega + omegasol(4)^2));
+Gjk3 = ((Phi1j*Phi1k/m1)./(-omega.^2 + 1i*2*damp*omegasol(1)*omega + omegasol(1)^2)) + ((Phi2j*Phi2k/m2)./(-omega.^2 + 1i*2*damp*omegasol(2)*omega + omegasol(2)^2)) + ...
+    ((Phi3j*Phi3k/m3)./(-omega.^2 + 1i*2*damp*omegasol(3)*omega + omegasol(3)^2)) + ((Phi4j*Phi4k/m4)./(-omega.^2 + 1i*2*damp*omegasol(4)*omega + omegasol(4)^2));
 
 estim3 = (Phi1j*Phi1k/m1) + (Phi2j*Phi2k/m2) + (Phi3j*Phi3k/m3) + (Phi4j*Phi4k/m4);
 xk = 1;
@@ -173,7 +173,7 @@ GrEXP = [ Gjk1 ; Gjk2 ; Gjk3 ; Gjk4 ];
 
 
 % Initial guesses
-x0 = [-10e-3,-10e-3,-10e-3,-10e-3,1/100,1/100,1/100,1/100,4.5,28.2,79,154.9,10e-3,10e-3];
+x0 = [0.1778,0.7369,0.0270,0.4946,1/100,1/100,1/100,1/100,4.5*2*pi,28.2*2*pi,79*pi*2,154.9*pi*2,0,0,0,0];
 % Lsqm function
 x = lsqnonlin(@(x) epsilon(x, fs, GrEXP), x0);
 % Having a first look at x
@@ -183,7 +183,7 @@ disp(x);
 
 %  each GrNUMi is supposed to match with the peak number i 
 
-GrNUM1 = (x(1)./(-omega.^2 + 1i*2*x(5)*x(9)*omega + x(9)^2)) + x(13)./(omega.^2) + x(14);
+GrNUM1 = (-x(4)./(-omega.^2 + 1i*2*x(8)*x(12)*omega + x(12)^2)) + x(13)./(omega.^2) + 1i*x(14)./(omega.^2) + x(15) + 1i*x(16);
 
 figure(5)
 subplot(2,1,1)
@@ -191,7 +191,7 @@ semilogy(fs,abs(Gjk1))
 hold on 
 semilogy(fs,abs(GrNUM1),'o')
 subplot(2,1,2)
-plot(fs,angle(-Gjk1))
+plot(fs,angle(Gjk1))
 hold on 
 plot(fs,angle(GrNUM1),'o')
 
