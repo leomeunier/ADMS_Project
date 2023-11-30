@@ -266,13 +266,25 @@ estim12= imag(Gjk_2(entrata_Gjk)).*2.*wn_1.^2.*csi;
 estim13= imag(Gjk_3(entrata_Gjk)).*2.*wn_1.^2.*csi;
 estim14= imag(Gjk_4(entrata_Gjk)).*2.*wn_1.^2.*csi;
 
+%y_damp= max(abs(Gjk_1))*sqrt(2)/2;
+% figure
+% semilogy(fs,abs(Gjk_1(1:size(fs,2))));
+% hold on
+% k=y_damp*ones(size(fs,2));
+% plot(fs,k);
+
+w2= 4.545*2*pi;
+w1= 4.455*2*pi;
+est_damp1= (w2^2-w1^2)/(4*wn_1^2);
+
+
 %estimation of damping
 
 
 % Least square minimization (have a look on epsilon function)
 
 % Initial guesses
-x0 = [estim11,estim12,estim13,estim14,1/100,wn_1,0,0,0,0];
+x0 = [estim11,estim12,estim13,estim14,est_damp1,wn_1,0,0,0,0];
 % Lsqm function
 x = lsqnonlin(@(x) epsilon1(x, fs, GrEXP), x0);
 % Having a first look at x
@@ -282,18 +294,18 @@ disp(x);
 
 %  each GrNUMi is supposed to match with the peak number i 
 
-GrNUM1 = (x(1)./(-omegafs.^2 + 1i*2*x(5)*x(6)*omegafs + x(6)^2)) + (x(7)+1i*x(8))./(omegafs.^2) + x(9)+1i*x(10);
+GrNUM1 = (-x(1)./(-omegafs.^2 + 1i*2*x(5)*x(6)*omegafs + x(6)^2)) + (x(7)+1i*x(8))./(omegafs.^2) + x(9)+1i*x(10);
 
 x1=x;
 figure
 subplot(2,1,1)
 semilogy(fs,abs(Gjk_1(1:size(fs,2))))
 hold on 
-semilogy(fs,abs(GrNUM1),'o')
+semilogy(fs,abs(GrNUM1(1:size(fs,2))),'o')
 subplot(2,1,2)
 plot(fs,angle(Gjk_1(1:size(fs,2))))
 hold on 
-plot(fs,angle(-GrNUM1),'o')
+plot(fs,angle(GrNUM1(1:size(fs,2))),'o')
 
 %%
 fs=14:0.01:50;
@@ -309,6 +321,8 @@ estim22= imag(Gjk_2(entrata_Gjk)).*2.*wn_2.^2.*csi;
 estim23= imag(Gjk_3(entrata_Gjk)).*2.*wn_2.^2.*csi;
 estim24= imag(Gjk_4(entrata_Gjk)).*2.*wn_2.^2.*csi;
 
+
+
 % Initial guesses
 x0 = [estim21,estim22,estim23,estim24,1/100,wn_2,0,0,0,0];
 % Lsqm function
@@ -320,9 +334,9 @@ disp(xj);
 
 %  each GrNUMi is supposed to match with the peak number i 
 
-GrNUM1 = (x(1)./(-omegafs.^2 + 1i*2*x(5)*x(6)*omegafs + x(6)^2)) + (x(7)+1i*x(8))./(omegafs.^2) + x(9)+1i*x(10);
+GrNUM1 = (-x(1)./(-omegafs.^2 + 1i*2*x(5)*x(6)*omegafs + x(6)^2)) + (x(7)+1i*x(8))./(omegafs.^2) + x(9)+1i*x(10);
 
-x2=x
+x2=x;
 figure
 subplot(2,1,1)
 semilogy(fs,abs(Gjk_1(1401:1400+size(fs,2))))
@@ -331,7 +345,7 @@ semilogy(fs,abs(GrNUM1),'o')
 subplot(2,1,2)
 plot(fs,angle(Gjk_1(1401:1400+size(fs,2))))
 hold on 
-plot(fs,angle(-GrNUM1),'o')
+plot(fs,angle(GrNUM1),'o')
 
 
 %%
@@ -348,6 +362,18 @@ estim32= imag(Gjk_2(entrata_Gjk)).*2.*wn_3.^2.*csi;
 estim33= imag(Gjk_3(entrata_Gjk)).*2.*wn_3.^2.*csi;
 estim34= imag(Gjk_4(entrata_Gjk)).*2.*wn_3.^2.*csi;
 
+% y_damp= max(abs(Gjk_1(5001:5000+size(fs,2))))*sqrt(2)/2;
+% figure
+% semilogy(fs,abs(Gjk_1(5001:5000+size(fs,2))));
+% hold on
+% k=y_damp*ones(size(fs,2));
+% plot(fs,k);
+
+w2= 4.545*2*pi;
+w1= 4.455*2*pi;
+est_damp1= (w2^2-w1^2)/(4*wn_1^2);
+
+
 % Initial guesses
 x0 = [estim31,estim32,estim33,estim34,1/100,wn_3,0,0,0,0];
 % Lsqm function
@@ -359,7 +385,7 @@ disp(x);
 
 %  each GrNUMi is supposed to match with the peak number i 
 
-GrNUM1 = (x(1)./(-omegafs.^2 + 1i*2*x(5)*x(6)*omegafs + x(6)^2)) + (x(7)+1i*x(8))./(omegafs.^2) + x(9)+1i*x(10);
+GrNUM1 = (-x(1)./(-omegafs.^2 + 1i*2*x(5)*x(6)*omegafs + x(6)^2)) + (x(7)+1i*x(8))./(omegafs.^2) + x(9)+1i*x(10);
 
 x3=x;
 figure
@@ -370,7 +396,7 @@ semilogy(fs,abs(GrNUM1),'o')
 subplot(2,1,2)
 plot(fs,angle(Gjk_1(5001:5000+size(fs,2))))
 hold on 
-plot(fs,angle(-GrNUM1),'o')
+plot(fs,angle(GrNUM1),'o')
 
 
 %%
@@ -398,7 +424,7 @@ disp(x);
 
 %  each GrNUMi is supposed to match with the peak number i 
 
-GrNUM1 = (x(1)./(-omegafs.^2 + 1i*2*x(5)*x(6)*omegafs + x(6)^2)) + (x(7)+1i*x(8))./(omegafs.^2) + x(9)+1i*x(10);
+GrNUM1 = (-x(1)./(-omegafs.^2 + 1i*2*x(5)*x(6)*omegafs + x(6)^2)) + (x(7)+1i*x(8))./(omegafs.^2) + x(9)+1i*x(10);
 
 x4=x;
 figure
@@ -409,7 +435,7 @@ semilogy(fs,abs(GrNUM1),'o')
 subplot(2,1,2)
 plot(fs,angle(Gjk_1(11500:11499+size(fs,2))))
 hold on 
-plot(fs,angle(-GrNUM1),'o')
+plot(fs,angle(GrNUM1),'o')
 
 %%
 % Mode shape identification
