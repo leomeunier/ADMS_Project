@@ -5,7 +5,7 @@ red = [20e-3 1e-3];
 blue = [32e-3 1.5e-3];
 green = [50e-3 2.5e-3];
 
-E = 7e10;
+Em = 7e11;
 rho = 2700;
 
 colors = [ red ; blue ; green];
@@ -16,8 +16,8 @@ i = 0;
 
 for i = 1:3
     m(i)= rho*pi*(colors(i,1)^2 - (colors(i,1)-colors(i,2))^2)/4;
-    EA(i)= E*pi*(colors(i,1)^2 - (colors(i,1)-colors(i,2))^2)/4;
-    EJ(i)= E*(pi/2)*((colors(i,1)/2)^4 - ((colors(i,1)-colors(i,2))/2)^4);
+    EA(i)= Em*pi*(colors(i,1)^2 - (colors(i,1)-colors(i,2))^2)/4;
+    EJ(i)= Em*(pi/2)*((colors(i,1)/2)^4 - ((colors(i,1)-colors(i,2))/2)^4);
 end
 
 c2 = min(EJ./m);
@@ -34,5 +34,6 @@ F = [0.49 0.63];
 G = [-0.08 0.48];
 H = [-0.12 0.72];
 
+disp(norm(A-D));
 
 
