@@ -252,41 +252,70 @@ legend('FRF1','FRF2','FRF3','FRF4')
 % 
 % title('comparison between FRFs phases')
 % legend('FRF1','FRF2','FRF3','FRF4')
-
-%% Modal parameters identification
-% Peak 1 FRF 1
-
-fs=3:0.01:6;
-omegafs = 2*pi*fs;
-
-GrEXP = [ Gjk_1(300:299+size(fs,2)) ; Gjk_2(300:299+size(fs,2)) ; Gjk_3(300:299+size(fs,2)) ; Gjk_4(300:299+size(fs,2)) ];
-
+Gjk_tot=[Gjk_1;Gjk_2;Gjk_3;Gjk_4];
+fs_tot=[fs_1;fs_2;fs_3;fs_4];
 w2= 4.545*2*pi;
 w1= 4.455*2*pi;
 est_damp1= (w2^2-w1^2)/(4*wn_1^2);
 
-entrata_Gjk= 4.5/0.01;
+w2= 79.74*2*pi;
+w1= 78.17*2*pi;
+est_damp3= (w2^2-w1^2)/(4*wn_3^2);
+
+w2= 28.46*2*pi;
+w1= 27.88*2*pi;
+est_damp2= (w2^2-w1^2)/(4*wn_2^2);
+
+w2= 156.36*2*pi;
+w1= 153.31*2*pi;
+est_damp4= (w2^2-w1^2)/(4*wn_3^2);
+
+est_damp= [est_damp1;est_damp2;est_damp3;est_damp4];
+
+entrata_Gjk= fs_tot(1)/0.01;
 estim11= imag(Gjk_1(entrata_Gjk)).*2.*wn_1.^2.*est_damp1;
 estim12= imag(Gjk_2(entrata_Gjk)).*2.*wn_1.^2.*est_damp1;
 estim13= imag(Gjk_3(entrata_Gjk)).*2.*wn_1.^2.*est_damp1;
 estim14= imag(Gjk_4(entrata_Gjk)).*2.*wn_1.^2.*est_damp1;
 
-%y_damp= max(abs(Gjk_1))*sqrt(2)/2;
-% figure
-% semilogy(fs,abs(Gjk_1(1:size(fs,2))));
-% hold on
-% k=y_damp*ones(size(fs,2));
-% plot(fs,k);
+entrata_Gjk= fs_tot(2)/0.01;
+estim21= imag(Gjk_1(entrata_Gjk)).*2.*wn_2.^2.*est_damp2;
+estim22= imag(Gjk_2(entrata_Gjk)).*2.*wn_2.^2.*est_damp2;
+estim23= imag(Gjk_3(entrata_Gjk)).*2.*wn_2.^2.*est_damp2;
+estim24= imag(Gjk_4(entrata_Gjk)).*2.*wn_2.^2.*est_damp2;
+
+entrata_Gjk= fs_tot(3)/0.01;
+estim31= imag(Gjk_1(entrata_Gjk)).*2.*wn_3.^2.*est_damp3;
+estim32= imag(Gjk_2(entrata_Gjk)).*2.*wn_3.^2.*est_damp3;
+estim33= imag(Gjk_3(entrata_Gjk)).*2.*wn_3.^2.*est_damp3;
+estim34= imag(Gjk_4(entrata_Gjk)).*2.*wn_3.^2.*est_damp3;
+
+entrata_Gjk= fs_tot(4)/0.01;
+estim41= imag(Gjk_1(entrata_Gjk)).*2.*wn_4.^2.*est_damp4;
+estim42= imag(Gjk_2(entrata_Gjk)).*2.*wn_4.^2.*est_damp4;
+estim43= imag(Gjk_3(entrata_Gjk)).*2.*wn_4.^2.*est_damp4;
+estim44= imag(Gjk_4(entrata_Gjk)).*2.*wn_4.^2.*est_damp4;
+
+estimation_A= [estim11 estim21 estim31 estim41;     %first number=peak, second number=FRF
+               estim12 estim22 estim32 estim42;
+               estim13 estim23 estim33 estim43;
+               estim14 estim24 estim34 estim44];
 
 
+%% Modal parameters identification
+% Peak 1 FRF 1
 
-%estimation of damping
+for k=1:4   %number of peaks
+for s=1:4   %number of FRFs
+fs=fs_tot(k)-2:0.01:fs_tot(k)+2;
+omegafs = 2*pi*fs;
 
+GrEXP = [ Gjk_1((fs_tot(k)-2)*100:(fs_tot(k)-2)*100-1+size(fs,2)) ; Gjk_2((fs_tot(k)-2)*100:(fs_tot(k)-2)*100-1+size(fs,2)) ; Gjk_3((fs_tot(k)-2)*100:(fs_tot(k)-2)*100-1+size(fs,2)) ; Gjk_4((fs_tot(k)-2)*100:(fs_tot(k)-2)*100-1+size(fs,2)) ];
 
 % Least square minimization (have a look on epsilon function)
 
 % Initial guesses
-x0 = [estim11,est_damp1,wn_1,0,0,0,0];
+x0 = [estimation_A(1,k),estimation_A(2,k),estimation_A(3,k),estimation_A(4,k),est_damp(k),wn_vector(k),0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
 % Lsqm function
 %options=optimoptions('lsqnonlin','Display','iter','MaxFunctionEvaluations',13000);
 x = lsqnonlin(@(x) epsilon1(x, omegafs, GrEXP), x0,[],[],[]);
@@ -297,197 +326,59 @@ disp(x);
 
 %  each GrNUMi is supposed to match with the peak number i 
 
-GrNUM1 = (-x(1)./(-omegafs.^2 + 1i*2*x(2)*x(3)*omegafs + x(3)^2)) + (x(4)+1i*x(5))./(omegafs.^2) + x(6)+1i*x(7);
-
-x1=x;
+GrNUM1 = (-x(s)./(-omegafs.^2 + 1i*2*x(5)*x(6)*omegafs + x(6)^2)) + (x(s+6)+1i*x(s+10)./(omegafs.^2)) + x(s+14)+1i*x(s+18);
+freq_range= 0.01:0.01:200;
 figure
 subplot(2,1,1)
-semilogy(fs,abs(Gjk_1(300:299+size(fs,2))))
+semilogy(freq_range,abs(Gjk_tot(s,:)))
 hold on 
-semilogy(fs,abs(GrNUM1(1:size(fs,2))),'o')
+semilogy(fs,abs(GrNUM1),'o')
 subplot(2,1,2)
-plot(fs,angle(Gjk_1(300:299+size(fs,2))))
+plot(freq_range,angle(Gjk_tot(s,:)))
 hold on 
-plot(fs,angle(GrNUM1(1:size(fs,2))),'o')
+plot(fs,angle(GrNUM1),'o')
+end
+end
 
-%after a fantastic talk with Ivano he said to us that this could be
-%correct, the problem is that lsqnonlin doesn't minimize the error function
-%but he said to try with more than one FRF. In this day we will try to do
-%it, I upload the new epsilon function in the file epsilon1
+GrNUM1 = (estimation_A(1,4)./(-omegafs.^2 + 1i*2*0.01*wn_4*omegafs + wn_4^2))
+freq_range= 0.01:0.01:200;
+figure
+subplot(2,1,1)
+semilogy(freq_range,abs(Gjk_tot(1,:)))
+hold on 
+semilogy(fs,abs(GrNUM1),'o')
+subplot(2,1,2)
+plot(freq_range,angle(Gjk_tot(1,:)))
+hold on 
+plot(fs,angle(GrNUM1),'o')
 
-% %% Peak 2 FRF 1
-% fs=14:0.01:50;
-% omegafs = 2*pi*fs;
 % 
-% GrEXP = [ Gjk_1(1401:1400+size(fs,2)) ; Gjk_2(1401:1400+size(fs,2)) ; Gjk_3(1401:1400+size(fs,2)) ; Gjk_4(1401:1400+size(fs,2)) ];
+%  fs=115:0.01:200;
 % 
-% % Least square minimization (have a look on epsilon function)
-% w2= 28.46*2*pi;
-% w1= 27.88*2*pi;
-% est_damp2= (w2^2-w1^2)/(4*wn_2^2);
-% 
-% 
-% entrata_Gjk= 28.2/0.01;
-% estim21= imag(Gjk_1(entrata_Gjk)).*2.*wn_2.^2.*est_damp2;
-% estim22= imag(Gjk_2(entrata_Gjk)).*2.*wn_2.^2.*est_damp2;
-% estim23= imag(Gjk_3(entrata_Gjk)).*2.*wn_2.^2.*est_damp2;
-% estim24= imag(Gjk_4(entrata_Gjk)).*2.*wn_2.^2.*est_damp2;
-% 
-% % y_damp= max(abs(Gjk_1(1400:5000)))*sqrt(2)/2;
-% % figure
-% % semilogy(fs,abs(Gjk_1(1401:1400+size(fs,2))));
-% % hold on
-% % k=y_damp*ones(size(fs,2));
-% % plot(fs,k);
-% 
-% 
-% % Initial guesses
-% options=optimoptions('lsqnonlin','Display','iter','MaxFunctionEvaluations',3000);
-% x0 = [estim21,estim22,estim23,estim24,est_damp2,wn_2,0,0,0,0];
-% % Lsqm function
-% x = lsqnonlin(@(x) epsilon1(x, fs, GrEXP), x0,[],[],options);
-% % Having a first look at x
-% disp(x);
-% 
-% % Computing of GrNUMs to compare them to Gjk
-% 
-% %  each GrNUMi is supposed to match with the peak number i 
-% 
-% GrNUM1 = (-x(1)./(-omegafs.^2 + 1i*2*x(5)*x(6)*omegafs + x(6)^2)) + (x(7)+1i*x(8))./(omegafs.^2) + x(9)+1i*x(10);
-% 
-% x2=x;
+% y_damp= max(abs(Gjk_1(11500:11499+size(fs,2))))*sqrt(2)/2;
 % figure
-% subplot(2,1,1)
-% semilogy(fs,abs(Gjk_1(1401:1400+size(fs,2))))
-% hold on 
-% semilogy(fs,abs(GrNUM1),'o')
-% subplot(2,1,2)
-% plot(fs,angle(Gjk_1(1401:1400+size(fs,2))))
-% hold on 
-% plot(fs,angle(GrNUM1),'o')
+% semilogy(fs,abs(Gjk_1(11500:11499+size(fs,2))));
+% hold on
+% k=y_damp*ones(size(fs,2));
+% plot(fs,k);
+
+%Mode shape identification
+X1num=[0.1778,0.7369,0.027,0.4946];
+figure
+
+x=0:0.01:L;
+eigenfunctions=[constants_matrix(1,1)*cos(g_vector(1)*x)+constants_matrix(2,1)*sin(g_vector(1)*x)+constants_matrix(3,1)*cosh(g_vector(1)*x)+constants_matrix(4,1)*sinh(g_vector(1)*x)];
+plot(xk,X1num,'o')
+hold on
+plot(x,eigenfunctions)
+hold on
+
+
+% figure 
+% plot(xj,x2(1:4),'o')
 % 
+% figure 
+% plot(xj,x3(1:4),'o')
 % 
-% %% Peak 3 FRF 1
-% fs=50:0.01:115;
-% omegafs = 2*pi*fs;
-% 
-% GrEXP = [ Gjk_1(5001:5000+size(fs,2)) ; Gjk_2(5001:5000+size(fs,2)) ; Gjk_3(5001:5000+size(fs,2)) ; Gjk_4(5001:5000+size(fs,2)) ];
-% 
-% % Least square minimization (have a look on epsilon function)
-% w2= 79.74*2*pi;
-% w1= 78.17*2*pi;
-% est_damp3= (w2^2-w1^2)/(4*wn_3^2);
-% 
-% entrata_Gjk= 79/0.01;
-% estim31= imag(Gjk_1(entrata_Gjk)).*2.*wn_3.^2.*est_damp3;
-% estim32= imag(Gjk_2(entrata_Gjk)).*2.*wn_3.^2.*est_damp3;
-% estim33= imag(Gjk_3(entrata_Gjk)).*2.*wn_3.^2.*est_damp3;
-% estim34= imag(Gjk_4(entrata_Gjk)).*2.*wn_3.^2.*est_damp3;
-% 
-% % y_damp= max(abs(Gjk_1(5001:5000+size(fs,2))))*sqrt(2)/2;
-% % figure
-% % semilogy(fs,abs(Gjk_1(5001:5000+size(fs,2))));
-% % hold on
-% % k=y_damp*ones(size(fs,2));
-% % plot(fs,k);
-% 
-% 
-% 
-% 
-% % Initial guesses
-% x0 = [estim31,estim32,estim33,estim34,est_damp3,wn_3,0,0,0,0];
-% % Lsqm function
-% x = lsqnonlin(@(x) epsilon1(x, fs, GrEXP), x0);
-% % Having a first look at x
-% disp(x);
-% 
-% % Computing of GrNUMs to compare them to Gjk
-% 
-% %  each GrNUMi is supposed to match with the peak number i 
-% 
-% GrNUM1 = (-x(1)./(-omegafs.^2 + 1i*2*x(5)*x(6)*omegafs + x(6)^2)) + (x(7)+1i*x(8))./(omegafs.^2) + x(9)+1i*x(10);
-% 
-% x3=x;
-% figure
-% subplot(2,1,1)
-% semilogy(fs,abs(Gjk_1(5001:5000+size(fs,2))))
-% hold on 
-% semilogy(fs,abs(GrNUM1),'o')
-% subplot(2,1,2)
-% plot(fs,angle(Gjk_1(5001:5000+size(fs,2))))
-% hold on 
-% plot(fs,angle(GrNUM1),'o')
-% 
-% 
-% %% Peak 4 FRF 1
-% fs=115:0.01:200;
-% omegafs = 2*pi*fs;
-% 
-% GrEXP = [ Gjk_1(11500:11499+size(fs,2)) ; Gjk_2(11500:11499+size(fs,2)) ; Gjk_3(11500:11499+size(fs,2)) ; Gjk_4(11500:11499+size(fs,2)) ];
-% 
-% % Least square minimization (have a look on epsilon function)
-% w2= 156.4*2*pi;
-% w1= 153.3*2*pi;
-% est_damp4= (w2^2-w1^2)/(4*wn_3^2);
-% 
-% entrata_Gjk= 154.9/0.01;
-% estim41= imag(Gjk_1(entrata_Gjk)).*2.*wn_4.^2.*est_damp4;
-% estim42= imag(Gjk_2(entrata_Gjk)).*2.*wn_4.^2.*est_damp4;
-% estim43= imag(Gjk_3(entrata_Gjk)).*2.*wn_4.^2.*est_damp4;
-% estim44= imag(Gjk_4(entrata_Gjk)).*2.*wn_4.^2.*est_damp4;
-% 
-% 
-% % y_damp= max(abs(Gjk_1(1150:1149+size(fs,2))))*sqrt(2)/2;
-% % figure
-% % semilogy(fs,abs(Gjk_1(1150:1149+size(fs,2))));
-% % hold on
-% % k=y_damp*ones(size(fs,2));
-% % plot(fs,k);
-% 
-% 
-% 
-% % Initial guesses
-% x0 = [estim41,estim42,estim43,estim44,est_damp4,wn_4,0,0,0,0];
-% % Lsqm function
-% x = lsqnonlin(@(x) epsilon1(x, fs, GrEXP), x0);
-% % Having a first look at x
-% disp(x);
-% 
-% % Computing of GrNUMs to compare them to Gjk
-% 
-% %  each GrNUMi is supposed to match with the peak number i 
-% 
-% GrNUM1 = (-x(1)./(-omegafs.^2 + 1i*2*x(5)*x(6)*omegafs + x(6)^2)) + (x(7)+1i*x(8))./(omegafs.^2) + x(9)+1i*x(10);
-% 
-% x4=x;
-% figure
-% subplot(2,1,1)
-% semilogy(fs,abs(Gjk_1(11500:11499+size(fs,2))))
-% hold on 
-% semilogy(fs,abs(GrNUM1),'o')
-% subplot(2,1,2)
-% plot(fs,angle(Gjk_1(11500:11499+size(fs,2))))
-% hold on 
-% plot(fs,angle(GrNUM1),'o')
-% 
-% %% 
-% % Mode shape identification
-% % X1num=[0.1778,0.7369,0.027,0.4946];
-% % figure
-% % 
-% % x=0:0.01:L;
-% % eigenfunctions=[constants_matrix(1,1)*cos(g_vector(1)*x)+constants_matrix(2,1)*sin(g_vector(1)*x)+constants_matrix(3,1)*cosh(g_vector(1)*x)+constants_matrix(4,1)*sinh(g_vector(1)*x)];
-% % plot(xj,X1num,'o')
-% % hold on
-% % plot(x,eigenfunctions)
-% % hold on
-% % 
-% % 
-% % figure 
-% % plot(xj,x2(1:4),'o')
-% % 
-% % figure 
-% % plot(xj,x3(1:4),'o')
-% % 
-% % figure 
+% figure 
 % plot(xj,x4(1:4),'o')
