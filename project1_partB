@@ -1,0 +1,24 @@
+close all
+clear all
+clc
+
+[filename,pathname]=uigetfile;
+
+load(filename);
+cd(pathname);
+
+figure
+for j=1:12
+    subplot(3,1,1)
+    semilogy(freq,abs(frf(:,j)))
+    hold on
+
+    subplot(3,1,2)
+    plot(freq,angle(frf(:,j)))
+    hold on 
+
+    subplot(3,1,3)
+    plot(freq,cohe(:,j));
+    hold on 
+end
+
