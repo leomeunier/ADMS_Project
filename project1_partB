@@ -22,3 +22,83 @@ for j=1:12
     hold on 
 end
 
+
+fs_1=667.324;
+fs_2=1625.31;
+fs_tot= [fs_1,fs_2];
+
+wn_1= fs_1*2*pi;
+wn_2=fs_2*2*pi;
+wn_tot= [wn_1,wn_2];
+
+%% estimations
+ 
+% y_damp= max(abs(frf((1951:2041),1)))*sqrt(2)/2;
+% figure
+% semilogy(freq(1951:2041),abs(frf((1951:2041),1)));
+% hold on
+% k=y_damp*ones(size(freq(1951:2041),1));
+% plot(freq(1951:2041),k);
+
+w1= 661.97*2*pi;
+w2= 672.71*2*pi;
+est_damp1= (w2^2-w1^2)/(4*wn_1^2);
+
+% y_damp= max(abs(frf((4801:4951),1)))*sqrt(2)/2;
+% figure
+% semilogy(freq(4801:4951),abs(frf((4801:4951),1)));
+% hold on
+% k=y_damp*ones(size(freq(4801:4951),1));
+% plot(freq(4801:4951),k);
+
+w1= 1615.24*2*pi;
+w2= 1635.09*2*pi;
+est_damp2= (w2^2-w1^2)/(4*wn_2^2);
+est_damp= [est_damp1;est_damp2];
+
+estimation_A= zeros(2,12);
+for j= 1:12
+    estimation_A1= -imag(max(frf((1951:2041),j))).*2.*wn_1.^2.*est_damp1;
+    estimation_A2= -imag(max(frf((4801:4951),j))).*2.*wn_2.^2.*est_damp2;
+    estimation_A(1,j)= estimation_A1;
+    estimation_A(2,j)= estimation_A2;
+end
+
+%% modal parameters identification
+
+entrata_freq= [2003,4877];
+
+for k=1:2   %number of peaks
+
+fs=freq(entrata_freq(k)-20:entrata_freq(k)+20);
+omegafs = 2*pi*fs;
+
+GrEXP = [frf(entrata_freq(k)-20:entrata_freq(k)+20,:)];
+
+% Least square minimization (have a look on epsilon function)
+
+% Initial guesses
+x0 = [estimation_A(k,1),estimation_A(k,2),estimation_A(k,3),estimation_A(k,4),estimation_A(k,5),estimation_A(k,6),estimation_A(k,7),estimation_A(k,8),estimation_A(k,9),estimation_A(k,10),estimation_A(k,11),estimation_A(k,12),est_damp(k),wn_tot(k),zeros(1,48)];
+% Lsqm function
+%options=optimoptions('lsqnonlin','Display','iter','MaxFunctionEvaluations',13000);
+x = lsqnonlin(@(x) epsilon2(x, omegafs, GrEXP), x0,[],[],[]);
+% Having a first look at x
+disp(x);
+
+% Computing of GrNUMs to compare them to Gjk
+
+%  each GrNUMi is supposed to match with the peak number i 
+for s=1:12   %number of FRFs
+GrNUM = (x(s)./(-omegafs.^2 + 1i*2*x(13)*x(14)*omegafs + x(14)^2)) + (x(s+14)+1i*x(s+26))./(omegafs.^2) + x(s+38)+1i*x(s+50);
+figure
+subplot(2,1,1)
+semilogy(freq,abs(frf(:,s)))
+hold on 
+semilogy(fs,abs(GrNUM),'o')
+subplot(2,1,2)
+plot(freq,angle(frf(:,s)))
+hold on 
+plot(fs,angle(GrNUM),'o')
+end
+end
+
