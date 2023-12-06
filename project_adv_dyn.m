@@ -116,8 +116,8 @@ for i= 1:4
     mass(i)= trapz(x,Y);
 end
 
-xk=[1.2;0.5;0.1;1];
-xj=[0.2;1;0.8;0.4];
+xk=[1.2;0.2;0.605;1];
+xj=[0.2;1.2;0.8;0.605];
 
 %FRF n°1
 
@@ -268,33 +268,33 @@ est_damp2= (w2^2-w1^2)/(4*wn_2^2);
 
 w2= 156.36*2*pi;
 w1= 153.31*2*pi;
-est_damp4= (w2^2-w1^2)/(4*wn_3^2);
+est_damp4= (w2^2-w1^2)/(4*wn_4^2);
 
 est_damp= [est_damp1;est_damp2;est_damp3;est_damp4];
 
 entrata_Gjk= fs_tot(1)/0.01;
-estim11= imag(Gjk_1(entrata_Gjk)).*2.*wn_1.^2.*est_damp1;
-estim12= imag(Gjk_2(entrata_Gjk)).*2.*wn_1.^2.*est_damp1;
-estim13= imag(Gjk_3(entrata_Gjk)).*2.*wn_1.^2.*est_damp1;
-estim14= imag(Gjk_4(entrata_Gjk)).*2.*wn_1.^2.*est_damp1;
+estim11= -imag(Gjk_1(entrata_Gjk)).*2.*wn_1.^2.*est_damp1;
+estim12= -imag(Gjk_2(entrata_Gjk)).*2.*wn_1.^2.*est_damp1;
+estim13= -imag(Gjk_3(entrata_Gjk)).*2.*wn_1.^2.*est_damp1;
+estim14= -imag(Gjk_4(entrata_Gjk)).*2.*wn_1.^2.*est_damp1;
 
 entrata_Gjk= fs_tot(2)/0.01;
-estim21= imag(Gjk_1(entrata_Gjk)).*2.*wn_2.^2.*est_damp2;
-estim22= imag(Gjk_2(entrata_Gjk)).*2.*wn_2.^2.*est_damp2;
-estim23= imag(Gjk_3(entrata_Gjk)).*2.*wn_2.^2.*est_damp2;
-estim24= imag(Gjk_4(entrata_Gjk)).*2.*wn_2.^2.*est_damp2;
+estim21= -imag(Gjk_1(entrata_Gjk)).*2.*wn_2.^2.*est_damp2;
+estim22= -imag(Gjk_2(entrata_Gjk)).*2.*wn_2.^2.*est_damp2;
+estim23= -imag(Gjk_3(entrata_Gjk)).*2.*wn_2.^2.*est_damp2;
+estim24= -imag(Gjk_4(entrata_Gjk)).*2.*wn_2.^2.*est_damp2;
 
 entrata_Gjk= fs_tot(3)/0.01;
-estim31= imag(Gjk_1(entrata_Gjk)).*2.*wn_3.^2.*est_damp3;
-estim32= imag(Gjk_2(entrata_Gjk)).*2.*wn_3.^2.*est_damp3;
-estim33= imag(Gjk_3(entrata_Gjk)).*2.*wn_3.^2.*est_damp3;
-estim34= imag(Gjk_4(entrata_Gjk)).*2.*wn_3.^2.*est_damp3;
+estim31= -imag(Gjk_1(entrata_Gjk)).*2.*wn_3.^2.*est_damp3;
+estim32= -imag(Gjk_2(entrata_Gjk)).*2.*wn_3.^2.*est_damp3;
+estim33= -imag(Gjk_3(entrata_Gjk)).*2.*wn_3.^2.*0;
+estim34= -imag(Gjk_4(entrata_Gjk)).*2.*wn_3.^2.*0;
 
 entrata_Gjk= fs_tot(4)/0.01;
-estim41= imag(Gjk_1(entrata_Gjk)).*2.*wn_4.^2.*est_damp4;
-estim42= imag(Gjk_2(entrata_Gjk)).*2.*wn_4.^2.*est_damp4;
-estim43= imag(Gjk_3(entrata_Gjk)).*2.*wn_4.^2.*est_damp4;
-estim44= imag(Gjk_4(entrata_Gjk)).*2.*wn_4.^2.*est_damp4;
+estim41= -imag(Gjk_1(entrata_Gjk)).*2.*wn_4.^2.*est_damp4;
+estim42= -imag(Gjk_2(entrata_Gjk)).*2.*wn_4.^2.*est_damp4;
+estim43= -imag(Gjk_3(entrata_Gjk)).*2.*wn_4.^2.*est_damp4;
+estim44= -imag(Gjk_4(entrata_Gjk)).*2.*wn_4.^2.*est_damp4;
 
 estimation_A= [estim11 estim21 estim31 estim41;     %first number=peak, second number=FRF
                estim12 estim22 estim32 estim42;
@@ -304,9 +304,9 @@ estimation_A= [estim11 estim21 estim31 estim41;     %first number=peak, second n
 
 %% Modal parameters identification
 % Peak 1 FRF 1
-
+GRNUM=zeros(16,401);
 for k=1:4   %number of peaks
-for s=1:4   %number of FRFs
+
 fs=fs_tot(k)-2:0.01:fs_tot(k)+2;
 omegafs = 2*pi*fs;
 
@@ -325,8 +325,9 @@ disp(x);
 % Computing of GrNUMs to compare them to Gjk
 
 %  each GrNUMi is supposed to match with the peak number i 
+for s=1:4   %number of FRFs
+GrNUM1 = (x(s)./(-omegafs.^2 + 1i*2*x(5)*x(6)*omegafs + x(6)^2)) + (x(s+6)+1i*x(s+10))./(omegafs.^2) + x(s+14)+1i*x(s+18);
 
-GrNUM1 = (-x(s)./(-omegafs.^2 + 1i*2*x(5)*x(6)*omegafs + x(6)^2)) + (x(s+6)+1i*x(s+10)./(omegafs.^2)) + x(s+14)+1i*x(s+18);
 freq_range= 0.01:0.01:200;
 figure
 subplot(2,1,1)
@@ -340,17 +341,6 @@ plot(fs,angle(GrNUM1),'o')
 end
 end
 
-GrNUM1 = (estimation_A(1,4)./(-omegafs.^2 + 1i*2*0.01*wn_4*omegafs + wn_4^2))
-freq_range= 0.01:0.01:200;
-figure
-subplot(2,1,1)
-semilogy(freq_range,abs(Gjk_tot(1,:)))
-hold on 
-semilogy(fs,abs(GrNUM1),'o')
-subplot(2,1,2)
-plot(freq_range,angle(Gjk_tot(1,:)))
-hold on 
-plot(fs,angle(GrNUM1),'o')
 
 % 
 %  fs=115:0.01:200;
@@ -363,7 +353,7 @@ plot(fs,angle(GrNUM1),'o')
 % plot(fs,k);
 
 %Mode shape identification
-X1num=[0.1778,0.7369,0.027,0.4946];
+X1num=[-0.1778,-0.7369,-0.027,-0.4946];
 figure
 
 x=0:0.01:L;
@@ -381,4 +371,4 @@ hold on
 % plot(xj,x3(1:4),'o')
 % 
 % figure 
-% plot(xj,x4(1:4),'o')
+% p
