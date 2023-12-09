@@ -67,7 +67,7 @@ end
 %% modal parameters identification
 
 entrata_freq= [2003,4877];
-
+mode_vector= zeros(2,12);
 for k=1:2   %number of peaks
 
 fs=freq(entrata_freq(k)-20:entrata_freq(k)+20);
@@ -90,6 +90,8 @@ disp(x);
 %  each GrNUMi is supposed to match with the peak number i 
 for s=1:12   %number of FRFs
 GrNUM = (x(s)./(-omegafs.^2 + 1i*2*x(13)*x(14)*omegafs + x(14)^2)) + (x(s+14)+1i*x(s+26))./(omegafs.^2) + x(s+38)+1i*x(s+50);
+mode_entr= imag(GrNUM(21,1));
+mode_vector(k,s)= mode_entr;    %raw=peak , column=FRF  
 figure
 subplot(2,1,1)
 semilogy(freq,abs(frf(:,s)))
@@ -99,6 +101,22 @@ subplot(2,1,2)
 plot(freq,angle(frf(:,s)))
 hold on 
 plot(fs,angle(GrNUM),'o')
+end
+end
+
+l= 1:12;
+theta= [3*pi/2:pi/12:29*pi/12];
+figure
+polarplot(theta,mode_vector(1,:)+5)
+
+% capire come fare migliore interpolazione
+% aggiungere cerchi sui sensori
+% capire perchè non va secondo picco (verificare estimations)
+% chiedere se anche nella parte A la forza va tenuta costante in un punto
+% ...oppure sfruttiamo l'experimental?
+
+
+
 end
 end
 
