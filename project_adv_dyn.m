@@ -116,9 +116,9 @@ for i= 1:4
     mass(i)= trapz(x,Y);
 end
 
-xk=[1.2;0.2;0.605;1];
-xj=[0.2;1.2;0.8;0.605];
-
+xk=[1.2;1.2;1.2;1.2];
+xj=[0.2;0.605;0.8;1.2];                
+%xk=[1.2;1;0.605;0.2];
 %FRF n°1
 
 eigenfunctions_ktot1= zeros(1,4);
@@ -304,7 +304,7 @@ estimation_A= [estim11 estim21 estim31 estim41;     %first number=peak, second n
 
 %% Modal parameters identification
 % Peak 1 FRF 1
-GRNUM=zeros(16,401);
+mode_vector=zeros(4,4);
 for k=1:4   %number of peaks
 
 fs=fs_tot(k)-2:0.01:fs_tot(k)+2;
@@ -327,6 +327,9 @@ disp(x);
 %  each GrNUMi is supposed to match with the peak number i 
 for s=1:4   %number of FRFs
 GrNUM1 = (x(s)./(-omegafs.^2 + 1i*2*x(5)*x(6)*omegafs + x(6)^2)) + (x(s+6)+1i*x(s+10))./(omegafs.^2) + x(s+14)+1i*x(s+18);
+
+mode_entr= imag(GrNUM1(1,201));
+mode_vector(k,s)= mode_entr;                      %raw=peak, colomn=frf
 
 freq_range= 0.01:0.01:200;
 figure
@@ -353,12 +356,12 @@ end
 % plot(fs,k);
 
 %Mode shape identification
-X1num=[-0.1778,-0.7369,-0.027,-0.4946];
+X1num= mode_vector(1,:)*mass(1);
 figure
 
 x=0:0.01:L;
 eigenfunctions=[constants_matrix(1,1)*cos(g_vector(1)*x)+constants_matrix(2,1)*sin(g_vector(1)*x)+constants_matrix(3,1)*cosh(g_vector(1)*x)+constants_matrix(4,1)*sinh(g_vector(1)*x)];
-plot(xk,X1num,'o')
+plot(xj,X1num,'o')
 hold on
 plot(x,eigenfunctions)
 hold on
@@ -369,6 +372,9 @@ hold on
 % 
 % figure 
 % plot(xj,x3(1:4),'o')
+% 
+% figure 
+
 % 
 % figure 
 % p
