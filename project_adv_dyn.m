@@ -90,13 +90,13 @@ disp(['X4 =' mat2str(X4)]);
 
 x=0:0.01:L;
 
-eigenfunctions= zeros(1,4);
+eig= zeros(4,size(x,2));
 figure;
 for i= 1:4;
-    eigenfunctions=[constants_matrix(1,i)*cos(g_vector(i)*x)+constants_matrix(2,i)*sin(g_vector(i)*x)+constants_matrix(3,i)*cosh(g_vector(i)*x)+constants_matrix(4,i)*sinh(g_vector(i)*x)];
-
+    eigenfunction=[constants_matrix(1,i)*cos(g_vector(i)*x)+constants_matrix(2,i)*sin(g_vector(i)*x)+constants_matrix(3,i)*cosh(g_vector(i)*x)+constants_matrix(4,i)*sinh(g_vector(i)*x)];
+    eig(i,:)= eigenfunction ;
     subplot(4,1,i);
-    plot(x,eigenfunctions/max(abs(eigenfunctions)))
+    plot(x,eigenfunction/max(abs(eigenfunction)))
     title('Mode shape')
     xlabel('w')
     ylabel('x')
@@ -116,9 +116,11 @@ for i= 1:4
     mass(i)= trapz(x,Y);
 end
 
-xk=[1.2;1.2;1.2;1.2];
+
 xj=[0.2;0.605;0.8;1.2];                
-%xk=[1.2;1;0.605;0.2];
+xk=[1.2;1;0.605;0.2];
+% xj=[0.2;0.42;0.9;1.2];
+% xk=[1.2;1.2;1.2;0.2];
 %FRF n°1
 
 eigenfunctions_ktot1= zeros(1,4);
@@ -287,8 +289,8 @@ estim24= -imag(Gjk_4(entrata_Gjk)).*2.*wn_2.^2.*est_damp2;
 entrata_Gjk= fs_tot(3)/0.01;
 estim31= -imag(Gjk_1(entrata_Gjk)).*2.*wn_3.^2.*est_damp3;
 estim32= -imag(Gjk_2(entrata_Gjk)).*2.*wn_3.^2.*est_damp3;
-estim33= -imag(Gjk_3(entrata_Gjk)).*2.*wn_3.^2.*0;
-estim34= -imag(Gjk_4(entrata_Gjk)).*2.*wn_3.^2.*0;
+estim33= -imag(Gjk_3(entrata_Gjk)).*2.*wn_3.^2.*est_damp3;
+estim34= -imag(Gjk_4(entrata_Gjk)).*2.*wn_3.^2.*est_damp3;
 
 entrata_Gjk= fs_tot(4)/0.01;
 estim41= -imag(Gjk_1(entrata_Gjk)).*2.*wn_4.^2.*est_damp4;
@@ -305,6 +307,7 @@ estimation_A= [estim11 estim21 estim31 estim41;     %first number=peak, second n
 %% Modal parameters identification
 % Peak 1 FRF 1
 mode_vector=zeros(4,4);
+GrNUMTOT=zeros(16,401); %scritte come Gjk num le prime quattro sono le 4 FRF nel primo picco e via così
 for k=1:4   %number of peaks
 
 fs=fs_tot(k)-2:0.01:fs_tot(k)+2;
@@ -328,8 +331,8 @@ disp(x);
 for s=1:4   %number of FRFs
 GrNUM1 = (x(s)./(-omegafs.^2 + 1i*2*x(5)*x(6)*omegafs + x(6)^2)) + (x(s+6)+1i*x(s+10))./(omegafs.^2) + x(s+14)+1i*x(s+18);
 
-mode_entr= imag(GrNUM1(1,201));
-mode_vector(k,s)= mode_entr;                      %raw=peak, colomn=frf
+mode_entr= GrNUM1(1,201)*1i*2*est_damp(k)*wn_vector(k)^2;
+mode_vector(k,s)= mode_entr;            %raw=peak, colomn=frf
 
 freq_range= 0.01:0.01:200;
 figure
@@ -356,25 +359,12 @@ end
 % plot(fs,k);
 
 %Mode shape identification
-X1num= mode_vector(1,:)*mass(1);
+for ii=1:4
+X1num= [mode_vector(ii,1)*mass(ii); mode_vector(ii,2)*mass(ii); mode_vector(ii,3)*mass(ii); mode_vector(ii,4)*mass(ii)];
+X1= [ X1num(1)/eigenfunctions_ktot1(ii)/max(abs(eig(1,:))), X1num(2)/eigenfunctions_ktot2(ii)/max(abs(eig(1,:))), X1num(3)/eigenfunctions_ktot3(ii)/max(abs(eig(1,:))), X1num(4)/eigenfunctions_ktot4(ii)/max(abs(eig(1,:)))];
 figure
-
 x=0:0.01:L;
-eigenfunctions=[constants_matrix(1,1)*cos(g_vector(1)*x)+constants_matrix(2,1)*sin(g_vector(1)*x)+constants_matrix(3,1)*cosh(g_vector(1)*x)+constants_matrix(4,1)*sinh(g_vector(1)*x)];
-plot(xj,X1num,'o')
+plot(xj,X1,'o')
 hold on
-plot(x,eigenfunctions)
-hold on
-
-
-% figure 
-% plot(xj,x2(1:4),'o')
-% 
-% figure 
-% plot(xj,x3(1:4),'o')
-% 
-% figure 
-
-% 
-% figure 
-% p
+plot(x,eig(ii,:)/max(abs(eig(ii,:))))
+end
