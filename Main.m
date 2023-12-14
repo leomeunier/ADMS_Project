@@ -106,7 +106,7 @@ end
 alpha = 6;      % [s^-1]
 beta = 1e-5;    % [s]
 
-C = alpha*M + beta*K;
+C = alpha*Mtot + beta*Ktot;
 CFF = C(1:ndof, 1:ndof);
 
 %% Frequency Response Function Fc
