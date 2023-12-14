@@ -136,19 +136,7 @@ semilogy(freq, abs(FRF));
 subplot(2,1,2);
 plot(freq, angle(FRF));
 
-for ii = 1:length(Om)
-    A = -Om(ii)^2*(-Om(ii)^2*MFF + 1i*Om(ii)*CFF + KFF);
-    acc(:,ii) = A\F0; 
-end
-
-FRF = acc(idof_j,:);
-figure(7)
-hold on 
-grid on
-subplot(2,2,1);
-semilogy(freq, abs(FRF));
-subplot(2,1,2);
-plot(freq, angle(FRF));
+% Acceleration to do
 
 
 % Horizontal displacement and acceleration of node H
@@ -174,20 +162,7 @@ semilogy(freq, abs(FRF));
 subplot(2,1,2);
 plot(freq, angle(FRF));
 
-for ii = 1:length(Om)
-    A = -Om(ii)^2*(-Om(ii)^2*MFF + 1i*Om(ii)*CFF + KFF);
-    acc(:,ii) = A\F0;      % Matrix in which each row is a FRF of dof
-end
-
-FRF = acc(idof_j,:);
-figure(9)
-hold on 
-grid on
-subplot(2,2,1);
-semilogy(freq, abs(FRF));
-subplot(2,1,2);
-plot(freq, angle(FRF));
-
+% Acceleration to do
 
 
 
