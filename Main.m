@@ -96,7 +96,7 @@ nmodes = 4;
 scale_factor = 2;
 for ii=1:nmodes
     mode = modes(:,ii);
-    figure();
+    figure(ii+1);
     diseg2(mode,scale_factor,incid,l,gamma,posit,idb,xy)
     title(['mode ',num2str(ii),' freq ',num2str(freq0(ii)),' Hz']);
 end
@@ -128,7 +128,7 @@ for ii = 1:length(Om)
 end
 
 FRF = X(idof_j,:);
-figure()
+figure(6)
 hold on 
 grid on
 subplot(2,2,1);
@@ -136,7 +136,19 @@ semilogy(freq, abs(FRF));
 subplot(2,1,2);
 plot(freq, angle(FRF));
 
-% Manca accelerazione
+for ii = 1:length(Om)
+    A = -Om(ii)^2*(-Om(ii)^2*MFF + 1i*Om(ii)*CFF + KFF);
+    acc(:,ii) = A\F0; 
+end
+
+FRF = acc(idof_j,:);
+figure(7)
+hold on 
+grid on
+subplot(2,2,1);
+semilogy(freq, abs(FRF));
+subplot(2,1,2);
+plot(freq, angle(FRF));
 
 
 % Horizontal displacement and acceleration of node H
@@ -154,7 +166,7 @@ for ii = 1:length(Om)
 end
 
 FRF = X(idof_j,:);
-figure()
+figure(8)
 hold on 
 grid on
 subplot(2,2,1);
@@ -162,29 +174,19 @@ semilogy(freq, abs(FRF));
 subplot(2,1,2);
 plot(freq, angle(FRF));
 
-% Manca accelerazione
+for ii = 1:length(Om)
+    A = -Om(ii)^2*(-Om(ii)^2*MFF + 1i*Om(ii)*CFF + KFF);
+    acc(:,ii) = A\F0;      % Matrix in which each row is a FRF of dof
+end
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+FRF = acc(idof_j,:);
+figure(9)
+hold on 
+grid on
+subplot(2,2,1);
+semilogy(freq, abs(FRF));
+subplot(2,1,2);
+plot(freq, angle(FRF));
 
 
 
