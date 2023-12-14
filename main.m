@@ -85,6 +85,12 @@ K = K + K1 + K8;
 
 MFF = M(1:ndof,1:ndof);
 KFF = K(1:ndof,1:ndof);
+MFC = M(1:ndof,ndof+1:nnod*3);
+KFC = K(1:ndof,ndof+1:nnod*3);
+MCF = M(ndof+1:nnod*3,1:ndof);
+KCF = K(ndof+1:nnod*3,1:ndof);
+MCC = M(ndof+1:nnod*3,ndof+1:nnod*3);
+KCC = K(ndof+1:nnod*3,ndof+1:nnod*3);
 
 [modes, omega2] = eig(inv(MFF)*KFF);
 omega = diag(sqrt(omega2));
@@ -98,9 +104,10 @@ disp(omega_sorted/(2*pi));
 %% Drawing modes shapes
 
 figure(2);
-scale_factor = 1.5;
+scale_factor = 2;
 for ii = 1:4
     mode = modes_sorted(:,ii);
+    subplot(2,2,ii)
     diseg2(mode,scale_factor,incid,l,gamma,posit,idb,xy);
 end
 
@@ -109,6 +116,10 @@ end
 alpha = 6;
 beta = 10e-5;
 CFF = alpha*MFF + beta*KFF;
+CFC = alpha*MFC + beta*KFC;
+CCF = alpha*MCF + beta*KCF;
+CCC = alpha*MCC + beta*KCC;
+
 
 %% Frequency Response Function
 
@@ -119,7 +130,7 @@ F0 = zeros(ndof,1);
 index = idb(3,2);
 F0(index) = 1;
 fs = 0:0.1:200;
-om = (0:0.1:200)*2*pi;
+om = fs*2*pi;
 for ii=1:length(om)
     A = -om(ii)^2*MFF + 1i*om(ii)*CFF + KFF;
     X(:,ii) = A\F0;
@@ -131,9 +142,17 @@ vf = idb(10,2);
 
 figure(3)
 subplot(2,1,1)
-semilogy(fs,abs(X(vf,:)'))
+semilogy(fs,abs(X(vf,:)))
 subplot(2,1,2)
-plot(fs,angle(X(vf,:)'))
+plot(fs,angle(X(vf,:)))
+
+% Vertical acceleration of node F 
+
+figure(4)
+subplot(2,1,1)
+semilogy(fs,abs(-(om.^2).*X(vf,:)))
+subplot(2,1,2)
+plot(fs,angle(-(om.^2).*X(vf,:)))
 
 %  Horizontal displacement of node H
 
@@ -141,13 +160,110 @@ hh = idb(13,1);
 
 figure(5)
 subplot(2,1,1)
-semilogy(fs,abs(X(hh,:)'))
+semilogy(fs,abs(X(hh,:)))
 subplot(2,1,2)
-plot(fs,angle(X(hh,:)'))
+plot(fs,angle(X(hh,:)))
+
+% Horizontal acceleration of node H 
+
+figure(6)
+subplot(2,1,1)
+semilogy(fs,abs(-(om.^2).*X(hh,:)))
+subplot(2,1,2)
+plot(fs,angle(-(om.^2).*X(hh,:)))
 
 
+% Shear force T, bending moment M and axial force N evaluated in the midpoint of the GE tube 
 
+mge = idb(11,:);
 
+n_el = 11; 
+L_el = l(n_el);
+idof_i = idb(11,:); 
+idof_j = idb(12,:); 
+lambda = [cos(gamma(n_el)) sin(gamma(n_el)) 0; 
+-sin(gamma(n_el)) cos(gamma(n_el)) 0; 
+0 0 1]; 
+Xi = lambda*X(idof_i,:);
+Xj = lambda*X(idof_j,:); 
+b = Xi(3,:);
+c = -3/L_el^2*Xi(2,:) +3/L_el^2*Xj(2,:) -2/L_el^1*Xi(3,:) -1/L_el^1*Xj(3,:);
+d = 2/L_el^3*Xi(2,:) -2/L_el^3*Xj(2,:) +1/L_el^2*Xi(3,:) +1/L_el^2*Xj(3,:);
+T = EJ(n_el)*(6*d);
+N = EA(n_el)*b;
+Mbend = EJ(n_el)*(2*c + 6*d*0);
 
+figure(7)
+subplot(2,1,1)
+semilogy(fs,abs(T))
+subplot(2,1,2)
+plot(fs,angle(T))
 
+figure(8)
+subplot(2,1,1)
+semilogy(fs,abs(Mbend))
+subplot(2,1,2)
+plot(fs,angle(Mbend))
 
+figure(9)
+subplot(2,1,1)
+semilogy(fs,abs(N))
+subplot(2,1,2)
+plot(fs,angle(N))
+
+% Constraint force in C
+
+ncons = nnod*3 - ndof;
+Y = zeros(ncons,1);
+Y(idb(3,1)-ndof) = 0.01;
+for ii = 1:length(om)
+Xc(:,ii)= -(-MFF*om(ii)^2 + 1i*CFF*om(ii) + KFF)\...
+(-MFC*om(ii)^2 + 1i*CFC*om(ii) + KFC)*Y; 
+R(:,ii)= (-MCF*om(ii)^2 + 1i*CCF*om(ii) + KCF)*Xc(:,ii)+...
+(-MCC*om(ii)^2 + 1i*CCC*om(ii) + KCC)*Y; 
+end
+RxC = R(idb(3,1)-ndof,:);
+
+figure(10)
+subplot(2,1,1)
+semilogy(fs,abs(RxC))
+subplot(2,1,2)
+plot(fs,angle(RxC))
+
+%% Modal superposition approach
+
+% Modal matrices
+ii = 1:2; % first 2 mode shapes
+Phi = modes_sorted(:,ii); 
+Mmod = Phi'*MFF*Phi; 
+Kmod = Phi'*KFF*Phi; 
+Cmod = Phi'*CFF*Phi; 
+Fmod = Phi'*F0;
+% FRF in modal superposition approach
+for ii = 1:length(om)
+xx_mod(:,ii) = (-om(ii)^2*Mmod + 1i*om(ii)*Cmod + Kmod) \ Fmod;
+end
+xx_2m = Phi * xx_mod; 
+
+FRF_modvf = xx_2m(vf,:); % FRF of the vertical displacement of F 
+FRF_modhh = xx_2m(hh,:); % FRF of the horizontal displacement of H
+
+figure(11)
+subplot(2,1,1)
+semilogy(fs,abs(FRF_modvf))
+hold on
+semilogy(fs,abs(X(vf,:)))
+subplot(2,1,2)
+plot(fs,angle(FRF_modvf))
+hold on
+plot(fs,angle(X(vf,:)))
+
+figure(12)
+subplot(2,1,1)
+semilogy(fs,abs(FRF_modhh))
+hold on
+semilogy(fs,abs(X(hh,:)))
+subplot(2,1,2)
+plot(fs,angle(FRF_modhh))
+hold on
+plot(fs,angle(X(hh,:)))
