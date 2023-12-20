@@ -2,9 +2,9 @@
 % Mechanical System Dynamics
 % FEM script
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-clear all; 
-close all; 
-clc;
+clear
+close all
+clc
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Load input file and assemble structure
 [file_i,xy,nnod,sizee,idb,ndof,incid,l,gamma,m,EA,EJ,T,posit,nbeam,pr]=loadstructure;
@@ -19,6 +19,7 @@ dis_stru(posit,l,gamma,xy,pr,idb,ndof);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Add concentrated elements
+% Modal matrices
 
 % Concentrated spring in node 1
 k = 4e+05;
@@ -74,7 +75,6 @@ M4 = E_m4'*M4_h*E_m4;
 % Mtot
 Mtot = M + M1 + M2 + M3 + M4;
 
-
 %% Compute natural frequencies and mode shapes
 MFF = Mtot(1:ndof,1:ndof);
 MCF = Mtot(ndof+1:end,1:ndof);
@@ -94,14 +94,14 @@ modes = modes(:,i_omega);
 
 nmodes = 4;
 scale_factor = 2;
-for ii=1:nmodes
+for ii = 1:nmodes
     mode = modes(:,ii);
     figure(ii+1);
     diseg2(mode,scale_factor,incid,l,gamma,posit,idb,xy)
-    title(['mode ',num2str(ii),' freq ',num2str(freq0(ii)),' Hz']);
+    legend('Undeformed structure',['Mode ',num2str(ii),' - freq ',num2str(freq0(ii)),' Hz']);
 end
 
-% Damping Matrix
+%% Damping Matrix
 
 alpha = 6;      % [s^-1]
 beta = 1e-5;    % [s]
@@ -114,7 +114,7 @@ CFF = C(1:ndof, 1:ndof);
 % Fc related to vertical displacement and acceleration of node F
 
 freq = [0:0.1:200]';
-Om = 2*pi*freq;
+Om = 2*pi*freq;go
 F0 = zeros(ndof,1);
 
 idof_j = idb(6,2); % vertical displacement of node F
@@ -129,21 +129,37 @@ end
 
 FRF = X(idof_j,:);
 figure(6)
+grid on
+subplot(2,1,1)
+semilogy(freq, abs(FRF),'linewidth',1.5)
+grid on
+xlabel('frequency [Hz]')
+ylabel('abs(FRF)')
+subplot(2,1,2)
+plot(freq, angle(FRF),'linewidth',1.5)
+grid on
+
+% Acceleration of node F
+for ii = 1:length(Om)
+    A = -Om(ii)^2*MFF + 1i*Om(ii)*CFF + KFF;
+    X(:,ii) = A\F0;
+    acc(:,ii) = -Om(ii)^2*X(:,ii);
+end
+
+FRF = acc(idof_j,:);
+figure(7)
 hold on 
 grid on
-subplot(2,2,1);
+subplot(2,1,1);
 semilogy(freq, abs(FRF));
 subplot(2,1,2);
 plot(freq, angle(FRF));
-
-% Acceleration to do
-
 
 % Horizontal displacement and acceleration of node H
 
 F0 = zeros(ndof,1);
 
-idof_j = idb(8,2); % vertical displacement of node H
+idof_j = idb(8,1); % horizontal displacement of node H
 idof_k = idb(3,2); % force in node C
 
 F0(idof_k) = 1;
@@ -157,12 +173,22 @@ FRF = X(idof_j,:);
 figure(8)
 hold on 
 grid on
-subplot(2,2,1);
+subplot(2,1,1);
 semilogy(freq, abs(FRF));
 subplot(2,1,2);
 plot(freq, angle(FRF));
 
-% Acceleration to do
+% Acceleration of node H (horizontal displacement of node H is known)
+acc(:,ii) = -Om(ii)^2*X(:,ii);
+
+FRF = acc(idof_j,:);
+figure(9)
+hold on 
+grid on
+subplot(2,1,1)
+semilogy(freq, abs(FRF));
+subplot(2,1,2)
+plot(freq, angle(FRF));
 
 
 
