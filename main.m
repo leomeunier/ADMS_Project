@@ -12,6 +12,8 @@ omega1 = ((pi./l).^2).*sqrt(EJ./m);
 
 Verif = omega1/omegamax;
 
+N = nnod*3;
+
 [M,K]=assem(incid,l,m,EA,EJ,gamma,idb);
 
 %% Added Masses
@@ -32,10 +34,10 @@ M10c = [m10 0 0; 0 m10 0; 0 0 0];
 
 % Construction of the full mass matrices
 
-Eml1 = zeros(45,3);
-Eml3 = zeros(45,3);
-Eml8 = zeros(45,3);
-Eml10 = zeros(45,3);
+Eml1 = zeros(N,3);
+Eml3 = zeros(N,3);
+Eml8 = zeros(N,3);
+Eml10 = zeros(N,3);
 
 Eml1(idb(1,1),1)= 1;
 Eml1(idb(1,2),2)= 1;
@@ -67,18 +69,35 @@ M = M + M1 + M3 + M8 + M10;
 
 k = 4e+05;
 
-Ek1 = zeros(45,1);
-Ek8 = zeros(45,1);
-
+Ek1 = zeros(N,1);
 Ek1(idb(1,2),1) = 1;
-Ek8(idb(8,2),1) = 1;
-
 K1 = Ek1*k*(Ek1');
-K8 = Ek8*k*(Ek8');
+
+% Use this one with ADMS_Assignement2.inp
+
+% Ek8 = zeros(45,1);
+% Ek8(idb(8,2),1) = 1;
+% K8 = Ek8*k*(Ek8');
+
+% Use this one for ADMS_Assignement5.inp only 
+
+K_k_L = [0 1 0 0 -1 0]'*k*[0 1 0 0 -1 0];
+g = 0;
+lambda_k = [cos(g) sin(g) 0
+-sin(g) cos(g) 0
+0 0 1];
+Lambda_k = [lambda_k zeros(3,3)
+zeros(3,3) lambda_k ];
+K_k_G = Lambda_k'* K_k_L * Lambda_k;
+idofn8 = idb(8,:);
+idofn16 = idb(16,:);
+idofk = [idofn8 idofn16];
+K(idofk, idofk) = K(idofk, idofk) + K_k_G;
 
 % final spring matrix
 
-K = K + K1 + K8;
+K = K + K1;
+% K = K + K8;
 
 
 %% Getting the natural frequencies and mode shapes
@@ -214,13 +233,8 @@ plot(fs,angle(N))
 % Constraint force in C
 
 ncons = nnod*3 - ndof;
-Y = zeros(ncons,1);
-Y(idb(3,1)-ndof) = 0.01;
 for ii = 1:length(om)
-Xc(:,ii)= -(-MFF*om(ii)^2 + 1i*CFF*om(ii) + KFF)\...
-(-MFC*om(ii)^2 + 1i*CFC*om(ii) + KFC)*Y; 
-R(:,ii)= (-MCF*om(ii)^2 + 1i*CCF*om(ii) + KCF)*Xc(:,ii)+...
-(-MCC*om(ii)^2 + 1i*CCC*om(ii) + KCC)*Y; 
+R(:,ii)= (-MCF*om(ii)^2 + 1i*CCF*om(ii) + KCF)*X(:,ii);
 end
 RxC = R(idb(3,1)-ndof,:);
 
@@ -267,3 +281,93 @@ subplot(2,1,2)
 plot(fs,angle(FRF_modhh))
 hold on
 plot(fs,angle(X(hh,:)))
+
+
+%% Input : vertical displacement of point A' Output : acceleration at node F (use ADMS_Assignement5.inp)
+
+vf = idb(10,2);
+fs = 0:0.1:200;
+om = fs*2*pi;
+ncons = nnod*3-ndof;
+Y = zeros(ncons,1);
+Y(idb(16,2)-ndof) = 1;
+for ii = 1:length(om)
+X(:,ii) = -(-MFF*om(ii)^2 + 1i*CFF*om(ii) + KFF)\ ...
+(-MFC*om(ii)^2 + 1i*CFC*om(ii) + KFC)*Y; 
+end
+
+figure()
+subplot(2,1,1)
+semilogy(fs,abs(-(om.^2).*X(vf,:)))
+subplot(2,1,2)
+plot(fs,angle(-(om.^2).*X(vf,:)))
+
+%% Time history of the steady-state vertical acceleration of point H 
+
+% We divide the problem in 2 and then we will use the superposition
+% approach ( Use also ADMS_Assignement5.inp here ) 
+
+% For first irregularity
+
+v = 12; % speed of bike
+lamb1 = 1;
+f1 = v/lamb1;
+om1 = 2*pi*f1;
+A1 = 0.001;
+ncons = nnod*3-ndof;
+Y1 = zeros(ncons,1);
+Y1(idb(16,2)-ndof) = A1; %[m]
+xx1 = -(-MFF*om1^2 + 1i*CFF*om1 + KFF)\ ...
+(-MFC*om1^2 + 1i*CFC*om1 + KFC)*Y1; 
+x1 = xx1(idb(13,2));
+
+dt = 0.0001;
+t = 0:dt:1;
+x1_t = zeros(length(t),1);
+a1_t = zeros(length(t),1);
+for ii = 1:length(t)
+x1_t(ii) = abs(x1)*cos(om1*t(ii)+angle(x1));
+a1_t(ii) = -om1^2*abs(x1)*cos(om1*t(ii)+angle(x1));
+end
+
+% For second irregularity
+
+lamb2 = 0.6;
+f2 = v/lamb2;
+om2 = 2*pi*f2;
+A2 = 0.0005;
+ncons = nnod*3-ndof;
+Y2 = zeros(ncons,1);
+Y2(idb(16,2)-ndof) = A2; %[m]
+xx2 = -(-MFF*om2^2 + 1i*CFF*om2 + KFF)\ ...
+(-MFC*om2^2 + 1i*CFC*om2 + KFC)*Y2; 
+x2 = xx2(idb(13,2));
+
+dt = 0.0001;
+t = 0:dt:1;
+x2_t = zeros(length(t),1);
+a2_t = zeros(length(t),1);
+for ii = 1:length(t)
+x2_t(ii) = abs(x2)*cos(om2*t(ii)+angle(x2));
+a2_t(ii) = -om2^2*abs(x2)*cos(om2*t(ii)+angle(x2));
+end
+
+% Superposition 
+
+a_t = a1_t + a2_t;
+figure()
+plot(t,a_t)
+
+%% Static response of the structure due to the weight of the cyclist
+
+FG  = zeros(N,1);
+indexH = idb(13,2);
+indexF = idb(10,2);
+FG(indexH) = -600;
+FG(indexF) = -100;
+xF = KFF \ FG(1:ndof);
+figure();
+diseg2(xF,100,incid,l,gamma,posit,idb,xy)
+title(['static deflection']);
+
+
