@@ -16,6 +16,8 @@ N = nnod*3;
 
 [M,K]=assem(incid,l,m,EA,EJ,gamma,idb);
 
+case_studied = 0; % Use 0 if you study the inp file without A' (Q1,Q2,Q3,Q4 n Q7) , Use 1 for the inp file with A' (Q5 n Q6)
+
 %% Added Masses
 
 % Masses in each node
@@ -72,32 +74,33 @@ k = 4e+05;
 Ek1 = zeros(N,1);
 Ek1(idb(1,2),1) = 1;
 K1 = Ek1*k*(Ek1');
-
-% Use this one with ADMS_Assignement2.inp
-
-% Ek8 = zeros(45,1);
-% Ek8(idb(8,2),1) = 1;
-% K8 = Ek8*k*(Ek8');
-
-% Use this one for ADMS_Assignement5.inp only 
-
-K_k_L = [0 1 0 0 -1 0]'*k*[0 1 0 0 -1 0];
-g = 0;
-lambda_k = [cos(g) sin(g) 0
--sin(g) cos(g) 0
-0 0 1];
-Lambda_k = [lambda_k zeros(3,3)
-zeros(3,3) lambda_k ];
-K_k_G = Lambda_k'* K_k_L * Lambda_k;
-idofn8 = idb(8,:);
-idofn16 = idb(16,:);
-idofk = [idofn8 idofn16];
-K(idofk, idofk) = K(idofk, idofk) + K_k_G;
-
-% final spring matrix
-
 K = K + K1;
-% K = K + K8;
+
+% this one is with ADMS_Assignement2.inp
+
+if case_studied == 0
+    Ek8 = zeros(45,1);
+    Ek8(idb(8,2),1) = 1;
+    K8 = Ek8*k*(Ek8');
+    K = K + K8;
+end
+
+% this one is with ADMS_Assignement5.inp 
+
+if case_studied==1
+    K_k_L = [0 1 0 0 -1 0]'*k*[0 1 0 0 -1 0];
+    g = 0;
+    lambda_k = [cos(g) sin(g) 0
+    -sin(g) cos(g) 0
+    0 0 1];
+    Lambda_k = [lambda_k zeros(3,3)
+    zeros(3,3) lambda_k ];
+    K_k_G = Lambda_k'* K_k_L * Lambda_k;
+    idofn8 = idb(8,:);
+    idofn16 = idb(16,:);
+    idofk = [idofn8 idofn16];
+    K(idofk, idofk) = K(idofk, idofk) + K_k_G;
+end
 
 
 %% Getting the natural frequencies and mode shapes
@@ -209,7 +212,7 @@ b = Xi(3,:);
 c = -3/L_el^2*Xi(2,:) +3/L_el^2*Xj(2,:) -2/L_el^1*Xi(3,:) -1/L_el^1*Xj(3,:);
 d = 2/L_el^3*Xi(2,:) -2/L_el^3*Xj(2,:) +1/L_el^2*Xi(3,:) +1/L_el^2*Xj(3,:);
 T = EJ(n_el)*(6*d);
-N = EA(n_el)*b;
+Nforce = EA(n_el)*b;
 Mbend = EJ(n_el)*(2*c + 6*d*0);
 
 figure(7)
@@ -226,9 +229,9 @@ plot(fs,angle(Mbend))
 
 figure(9)
 subplot(2,1,1)
-semilogy(fs,abs(N))
+semilogy(fs,abs(Nforce))
 subplot(2,1,2)
-plot(fs,angle(N))
+plot(fs,angle(Nforce))
 
 % Constraint force in C
 
@@ -282,6 +285,29 @@ plot(fs,angle(FRF_modhh))
 hold on
 plot(fs,angle(X(hh,:)))
 
+figure(13)
+subplot(2,1,1)
+semilogy(fs,abs(-om.^2.*FRF_modvf))
+hold on
+semilogy(fs,abs(-om.^2.*X(vf,:)))
+subplot(2,1,2)
+plot(fs,angle(-om.^2.*FRF_modvf))
+hold on
+plot(fs,angle(-om.^2.*X(vf,:)))
+
+figure(14)
+subplot(2,1,1)
+semilogy(fs,abs(-om.^2.*FRF_modhh))
+hold on
+semilogy(fs,abs(-om.^2.*X(hh,:)))
+subplot(2,1,2)
+plot(fs,angle(-om.^2.*FRF_modhh))
+hold on
+plot(fs,angle(-om.^2.*X(hh,:)))
+
+% What we can notice in these comparisons is that the modal approach
+% follows well the "experimental" curve for the two first peaks, that are
+% related to the first two natural frequencies and so the first two modes. 
 
 %% Input : vertical displacement of point A' Output : acceleration at node F (use ADMS_Assignement5.inp)
 
@@ -296,7 +322,7 @@ X(:,ii) = -(-MFF*om(ii)^2 + 1i*CFF*om(ii) + KFF)\ ...
 (-MFC*om(ii)^2 + 1i*CFC*om(ii) + KFC)*Y; 
 end
 
-figure()
+figure(15)
 subplot(2,1,1)
 semilogy(fs,abs(-(om.^2).*X(vf,:)))
 subplot(2,1,2)
@@ -355,7 +381,7 @@ end
 % Superposition 
 
 a_t = a1_t + a2_t;
-figure()
+figure(16)
 plot(t,a_t)
 
 %% Static response of the structure due to the weight of the cyclist
@@ -366,8 +392,10 @@ indexF = idb(10,2);
 FG(indexH) = -600;
 FG(indexF) = -100;
 xF = KFF \ FG(1:ndof);
-figure();
+figure(17)
 diseg2(xF,100,incid,l,gamma,posit,idb,xy)
 title(['static deflection']);
+
+disp(xF(idb(11,2)))
 
 
