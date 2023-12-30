@@ -135,22 +135,33 @@ end
 
 %% MODE SHAPE for first natural frequency
 
-theta = [pi/2:15*pi/180:3*pi/2];
+theta = [3*pi/2:pi/12:29*pi/12]';
 Peaks = [];
 for ii = 1:12
     [~, I] = max(abs(G_r_num1(OM_vect, X(1,1),X(1,2), X(ii,3:7))));
     Peaks = [Peaks; imag(G_r_num1(OM_vect(I), X(1,1),X(1,2), X(ii,3:7)))];
 end
 
-Peaks = [Peaks; Peaks(1)];
+%Peaks = [Peaks; Peaks(1)];
+theta_symm= pi-theta;
+theta_interp= linspace(3*pi/2,29*pi/12,500);
+peaks_interp= interp1(theta,Peaks,theta_interp,'spline');
 figure(14)
-polarplot(theta,Peaks+5)
+polarplot(theta_interp, peaks_interp+9,'Linewidth',2,'Color','green')
 hold on
-polarplot(theta,-(Peaks+5))
+polarplot(theta,Peaks+9,'o','Linewidth',2,'Color','green')
 hold on
-theta2 = [pi/2:15*pi/180:450*pi/180];
-polarplot(theta2,5*ones(25,1))
-legend('Tire axial displacement', 'Symmetric', 'Undeformed tire')
+theta_interp_symm= pi- theta_interp;
+peaks_interp_symm= interp1(theta_symm,Peaks,theta_interp_symm,'spline');
+polarplot(theta_interp_symm,peaks_interp_symm+9,'Linewidth',2,'Color','green')
+hold on
+theta2 = [pi/2:pi/1000:450*pi/180];
+rticklabels({});
+thetaticks([0:15:360]);
+polarplot(theta2,9*ones(length(theta2),1),'--','Linewidth',2,'Color','k')
+rticklabels({});
+thetaticks([0:15:360]);
+legend('Tire axial displacement', 'Sensors', 'Symmetric','Undeformed tyre')
  
 
 
@@ -217,19 +228,27 @@ end
 
 %% MODE SHAPE for second natural frequency
 
-theta = [pi/2:15*pi/180:3*pi/2];
+theta = [3*pi/2:pi/12:29*pi/12];
 Peaks = [];
 for ii = 1:12
     [~, I] = max(abs(G_r_num1(OM_vect, X(1,1),X(1,2), X(ii,3:7))));
     Peaks = [Peaks; imag(G_r_num1(OM_vect(I), X(1,1),X(1,2), X(ii,3:7)))];
 end
 
-Peaks = [Peaks; Peaks(1)];
+theta_symm= pi-theta;
+theta_interp= linspace(3*pi/2,29*pi/12,500);
+peaks_interp= interp1(theta,Peaks,theta_interp,'spline');
 figure(15)
-polarplot(theta,Peaks+5)
+polarplot(theta_interp, peaks_interp+9,'Linewidth',2,'Color','green')
 hold on
-%polarplot(theta,-(Peaks+5))
+polarplot(theta,Peaks+9,'o','Linewidth',2,'Color','green')
 hold on
-theta2 = [pi/2:15*pi/180:450*pi/180];
-polarplot(theta2,5*ones(25,1))
-legend('Tire axial displacement', 'Undeformed tire')
+theta_interp_symm= pi- theta_interp;
+peaks_interp_symm= interp1(theta_symm,Peaks,theta_interp_symm,'spline');
+polarplot(theta_interp_symm,peaks_interp_symm+9,'Linewidth',2,'Color','green')
+hold on
+theta2 = [pi/2:pi/1000:450*pi/180];
+polarplot(theta2,9*ones(length(theta2),1),'--','Linewidth',2,'Color','k')
+rticklabels({});
+thetaticks([0:15:360]);
+legend('Tire axial displacement', 'Sensors', 'Symmetric','Undeformed tyre')
